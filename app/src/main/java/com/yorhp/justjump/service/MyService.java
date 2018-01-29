@@ -60,8 +60,8 @@ public class MyService extends Service {
         btnView1 = new ImageView(getApplicationContext());
         btnView2 = new ImageView(getApplicationContext());
         btnView3 = new ImageView(getApplicationContext());
-        btnView1.setImageResource(R.drawable.ic_point);
-        btnView2.setImageResource(R.drawable.ic_point);
+        btnView1.setImageResource(R.drawable.img_chess);
+        btnView2.setImageResource(R.drawable.img_chess);
         btnView3.setImageResource(R.drawable.ic_star);
         windowManager = (WindowManager) getApplicationContext()
                 .getSystemService(Context.WINDOW_SERVICE);
@@ -76,8 +76,8 @@ public class MyService extends Service {
         params.format = PixelFormat.RGBA_8888;
 
         // 设置悬浮框的宽高
-        params.width = 250;
-        params.height = 250;
+        params.width = 350;
+        params.height = 350;
         params.gravity = Gravity.LEFT;
         params.x = 200;
         params.y = 000;
@@ -95,8 +95,8 @@ public class MyService extends Service {
         params2.format = PixelFormat.RGBA_8888;
 
         // 设置悬浮框的宽高
-        params2.width = 250;
-        params2.height = 250;
+        params2.width = 350;
+        params2.height = 350;
         params2.gravity = Gravity.LEFT;
         params2.x = 800;
         params2.y = 000;
