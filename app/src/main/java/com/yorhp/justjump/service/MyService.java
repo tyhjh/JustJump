@@ -83,6 +83,9 @@ public class MyService extends Service {
             public void run() {
                 int i = 0;
                 while (i >= 0) {
+                    File file1 = new File(MyApplication.rootDir + "/screenshots.png");
+                    if (file1.exists())
+                        file1.delete();
                     execShellCmd("screencap -p " + MyApplication.rootDir + "/screenshots.png");
                     Bitmap bitmap = BitmapFactory.decodeFile(screenPath);
                     while (bitmap == null) {
@@ -99,8 +102,6 @@ public class MyService extends Service {
                     Bitmap bitmap_me = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * 0.4166), bitmap.getWidth(), (int) (bitmap.getHeight() * 0.2304));
                     File file_me = bitmapToPath(bitmap_me, "img_me");
                     distence = imageRecognition.getDistence(file_me.getPath(), me, next.getPath(), finalTemplateFilePath, (int) (bitmap.getHeight() * 0.4166), (int) (bitmap.getHeight() * 0.3125));
-
-
 
 
                     System.out.println("距离为：" + distence);
@@ -160,11 +161,11 @@ public class MyService extends Service {
         // 设置悬浮框的宽高
         params.width = 50;
         params.height = 50;
-        params.gravity=Gravity.TOP;
+        params.gravity = Gravity.TOP;
         params.x = 540;
         params.y = 540;
 
-        System.out.println("params.x："+params.x);
+        System.out.println("params.x：" + params.x);
 
         params2 = new WindowManager.LayoutParams();
 
@@ -179,8 +180,8 @@ public class MyService extends Service {
         // 设置悬浮框的宽高
         params2.width = 30;
         params2.height = 30;
-        params2.gravity=Gravity.START;
-        params2.x = dip2px(getApplicationContext(),540);
+        params2.gravity = Gravity.START;
+        params2.x = dip2px(getApplicationContext(), 540);
 
 
         params2.y = 960;
