@@ -63,18 +63,17 @@ public class MyService extends Service {
         btnView1.setImageResource(R.drawable.img_chess);
         btnView2.setImageResource(R.drawable.img_chess);
         btnView3.setImageResource(R.drawable.ic_star);
-        windowManager = (WindowManager) getApplicationContext()
-                .getSystemService(Context.WINDOW_SERVICE);
-        params = new WindowManager.LayoutParams();
 
-        // 设置Window Type
+
+        windowManager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+        params = new WindowManager.LayoutParams();
+        // 设置Window Type，这个设置可以保证悬浮框一直不消失，并且在最上层
         params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
         // 设置悬浮框不可触摸
         params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|FLAG_LAYOUT_INSET_DECOR;
         // 悬浮窗不可触摸，不接受任何事件,同时不影响后面的事件响应
         params.format = PixelFormat.RGBA_8888;
-
         // 设置悬浮框的宽高
         params.width = 350;
         params.height = 350;
@@ -219,14 +218,12 @@ public class MyService extends Service {
 
 
     private void execShellCmd(String cmd) {
-
         try {
             // 申请获取root权限，这一步很重要，不然会没有作用
             Process process = Runtime.getRuntime().exec("su");
             // 获取输出流
             OutputStream outputStream = process.getOutputStream();
-            DataOutputStream dataOutputStream = new DataOutputStream(
-                    outputStream);
+            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
             dataOutputStream.writeBytes(cmd);
             dataOutputStream.flush();
             dataOutputStream.close();
