@@ -106,8 +106,8 @@ public class ImageRecognition {
         android.graphics.Point point = new android.graphics.Point();
         point.set(x, y);
 
-        if (mlr.maxVal > 0.8)
-            Highgui.imwrite(MyApplication.rootDir + "matching/" + "/原图中的匹配图" + System.currentTimeMillis() + ".jpg", source);
+        if (mlr.maxVal > 0.7)
+            Highgui.imwrite(MyApplication.rootDir + "matching/" + "/原图中的匹配图" + mlr.maxVal + ".jpg", source);
 
         LikeResult likeResult = new LikeResult();
         likeResult.setPoint(point);
@@ -133,6 +133,8 @@ public class ImageRecognition {
             }
         }
         System.out.println("最终相似度为：" + likeResult1.getLikeLevel());
+        if(likeResult1.getLikeLevel()<0.5)
+            return null;
         return likeResult1;
     }
 
