@@ -81,7 +81,6 @@ public class ImageRecognition {
 
         Mat template = Highgui.imread(templateFilePath1, Highgui.CV_LOAD_IMAGE_COLOR);
         Mat source = Highgui.imread(originalFilePath, Highgui.CV_LOAD_IMAGE_COLOR);
-
         //创建于原图相同的大小，储存匹配度
         Mat result = Mat.zeros(source.rows() - template.rows() + 1, source.cols() - template.cols() + 1, CvType.CV_8UC1);
         //调用模板匹配方法
@@ -96,6 +95,7 @@ public class ImageRecognition {
         Point matchLoc = mlr.maxLoc;
         //在原图上的对应模板可能位置画一个绿色矩形
         Core.rectangle(source, matchLoc, new Point(matchLoc.x + template.width(), matchLoc.y + template.height()), new Scalar(0, 255, 0));
+
         //将结果输出到对应位置
         //System.out.println("中心点位置：" + matchLoc.x + template.width() / 2 + "，" + matchLoc.y + template.height() / 2);
 
