@@ -3,17 +3,22 @@ package com.yorhp.justjump;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.yorhp.justjump.app.MyApplication;
 import com.yorhp.justjump.service.MyService;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+
+import static com.yorhp.justjump.opencv.ImageRecognition.getPoint;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView lenaView;
     private Bitmap bmp;
 
-
+    String filepath = MyApplication.rootDir + "/" + "img_next" + ".png";
 
 
     @Override
@@ -44,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startService(intent);
-                if (!bProc) {
+                /*if (!bProc) {
                     Bitmap grayBmp = toGray(bmp);
                     lenaView.setImageBitmap(grayBmp);
                     btnProc.setText(R.string.undo);
@@ -53,15 +58,40 @@ public class MainActivity extends AppCompatActivity {
                     lenaView.setImageBitmap(bmp);
                     btnProc.setText(R.string.gray_proc);
                     bProc = false;
-                }
+                }*/
+
+                //int clr1 = getPicturePixel(filepath, 340, 165);
+                //int clr2 = getPicturePixel(filepath, 0, 0);
+                //eque(clr1, clr2);
+
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Point point = getPoint(filepath);
+                        System.out.println("x：" + point.x + "，y：" + point.y);
+                    }
+                });
+
+                //thread.start();
             }
         });
 
 
-
-
-
     }
+
+
+    public int getPicturePixel(String originPath, int x, int y) {
+        Bitmap workingBitmap = BitmapFactory.decodeFile(originPath);
+        int clr = workingBitmap.getPixel(x, y);
+        System.out.println("R：" + Color.red(clr) + "，G：" + Color.green(clr) + "，B：" + Color.blue(clr));
+        return clr;
+    }
+
+    public void getPicturePixel(Bitmap workingBitmap, int x, int y) {
+        int clr = workingBitmap.getPixel(x, y);
+        System.out.println("x："+x+"，y："+(y)+"，R：" + Color.red(clr) + "，G：" + Color.green(clr) + "，B：" + Color.blue(clr));
+    }
+
 
     public static Bitmap toGray(Bitmap bmp) {
         Mat rgbMat = new Mat();
@@ -73,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
         Utils.matToBitmap(grayMat, grayBmp);
         return grayBmp;
     }
+
 
 
 }

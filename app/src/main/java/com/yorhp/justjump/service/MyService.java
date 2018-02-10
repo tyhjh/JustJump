@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -37,14 +35,12 @@ public class MyService extends Service {
     String me = MyApplication.rootDir + "/opencv_me/me.png";
 
 
-    ImageView btnView1, btnView2, btnView3;
+    ImageView btnView3;
     boolean isAdded;
     Thread thread;
 
     public static final int FLAG_LAYOUT_INSET_DECOR = 0x00000200;
 
-    WindowManager.LayoutParams params;
-    WindowManager.LayoutParams params2;
     WindowManager.LayoutParams params3;
 
     WindowManager windowManager;
@@ -77,7 +73,6 @@ public class MyService extends Service {
 
         System.out.println("模板个数为：" + templateFilePath.length);
 
-        String[] finalTemplateFilePath = templateFilePath;
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -101,15 +96,17 @@ public class MyService extends Service {
 
                     Bitmap bitmap_me = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * 0.4166), bitmap.getWidth(), (int) (bitmap.getHeight() * 0.2304));
                     File file_me = bitmapToPath(bitmap_me, "img_me");
-                    distence = imageRecognition.getDistence(file_me.getPath(), me, next.getPath(), finalTemplateFilePath, (int) (bitmap.getHeight() * 0.4166), (int) (bitmap.getHeight() * 0.3125));
+                    distence = imageRecognition.getDistence(file_me.getPath(), me, next.getPath(), (int) (bitmap.getHeight() * 0.4166), (int) (bitmap.getHeight() * 0.3125));
 
 
                     System.out.println("距离为：" + distence);
+
+
                     File file = new File(screenPath);
                     if (file.exists()) {
                         file.delete();
                     }
-                    int time = (int) (distence * 1.4);
+                    int time = (int) (distence * 1.38);
                     String msg = "input touchscreen swipe 170 187 170 187 " + time;
                     execShellCmd(msg);
                     try {
@@ -135,57 +132,11 @@ public class MyService extends Service {
     }
 
     private void createWindowView() {
-        btnView1 = new ImageView(getApplicationContext());
-        btnView2 = new ImageView(getApplicationContext());
         btnView3 = new ImageView(getApplicationContext());
-        btnView1.setImageResource(R.drawable.ic_point_white);
-        btnView2.setImageResource(R.drawable.img_chess);
         btnView3.setImageResource(R.drawable.ic_star);
-
-
-        btnView1.setVisibility(View.GONE);
-        btnView2.setVisibility(View.GONE);
 
         windowManager = (WindowManager) getApplicationContext()
                 .getSystemService(Context.WINDOW_SERVICE);
-        params = new WindowManager.LayoutParams();
-
-        // 设置Window Type
-        params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
-        // 设置悬浮框不可触摸
-        params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | FLAG_LAYOUT_INSET_DECOR;
-        // 悬浮窗不可触摸，不接受任何事件,同时不影响后面的事件响应
-        params.format = PixelFormat.RGBA_8888;
-
-        // 设置悬浮框的宽高
-        params.width = 50;
-        params.height = 50;
-        params.gravity = Gravity.TOP;
-        params.x = 540;
-        params.y = 540;
-
-        System.out.println("params.x：" + params.x);
-
-        params2 = new WindowManager.LayoutParams();
-
-        // 设置Window Type
-        params2.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
-        // 设置悬浮框不可触摸
-        params2.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | FLAG_LAYOUT_INSET_DECOR;
-        // 悬浮窗不可触摸，不接受任何事件,同时不影响后面的事件响应
-        params2.format = PixelFormat.RGBA_8888;
-
-        // 设置悬浮框的宽高
-        params2.width = 30;
-        params2.height = 30;
-        params2.gravity = Gravity.START;
-        params2.x = dip2px(getApplicationContext(), 540);
-
-
-        params2.y = 960;
-
 
         params3 = new WindowManager.LayoutParams();
 
@@ -204,62 +155,6 @@ public class MyService extends Service {
         params3.x = 300;
         params3.y = 200;
 
-        /*btnView1.setOnTouchListener(new View.OnTouchListener() {
-            int lastX, lastY;
-            int paramX, paramY;
-
-            //保存悬浮框最后位置的变量
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        lastX = (int) event.getRawX();
-                        lastY = (int) event.getRawY();
-                        paramX = params.x;
-                        paramY = params.y;
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        int dx = (int) event.getRawX() - lastX;
-                        int dy = (int) event.getRawY() - lastY;
-                        params.x = paramX + dx;
-                        params.y = paramY + dy;
-                        // 更新悬浮窗位置
-                        windowManager.updateViewLayout(btnView1, params);
-                        break;
-                }
-                return true;
-            }
-        });*/
-
-        // 设置悬浮框的Touch监听
-        /*
-        btnView2.setOnTouchListener(new View.OnTouchListener() {
-            //保存悬浮框最后位置的变量
-            int lastX, lastY;
-            int paramX, paramY;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        lastX = (int) event.getRawX();
-                        lastY = (int) event.getRawY();
-                        paramX = params2.x;
-                        paramY = params2.y;
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        int dx = (int) event.getRawX() - lastX;
-                        int dy = (int) event.getRawY() - lastY;
-                        params2.x = paramX + dx;
-                        params2.y = paramY + dy;
-                        // 更新悬浮窗位置
-                        windowManager.updateViewLayout(btnView2, params2);
-                        break;
-                }
-                return true;
-            }
-        });*/
 
 
         btnView3.setOnTouchListener(new View.OnTouchListener() {
@@ -295,13 +190,9 @@ public class MyService extends Service {
         btnView3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-/*                distence = (int) (Math.sqrt((params.x - params2.x) * (params.x - params2.x) + (params.y - params2.y) * (params.y - params2.y)));
-                Log.e("两点的真正距离为：", distence + "");*/
                 thread.start();
             }
         });
-        //windowManager.addView(btnView1, params);
-        //windowManager.addView(btnView2, params2);
         windowManager.addView(btnView3, params3);
         isAdded = true;
     }
@@ -323,7 +214,7 @@ public class MyService extends Service {
     }
 
 
-    private File bitmapToPath(Bitmap bitmap, String name) {
+    public static File bitmapToPath(Bitmap bitmap, String name) {
         String filepath = MyApplication.rootDir + "/" + name + ".png";
         File file = new File(filepath);
         //3.保存Bitmap
@@ -348,23 +239,6 @@ public class MyService extends Service {
         }
         return file;
     }
-
-
-    Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-
-            switch (msg.what) {
-                case 1:
-                    windowManager.updateViewLayout(btnView1, params);
-                    break;
-                default:
-                    break;
-            }
-
-        }
-    };
 
 
     public static int dip2px(Context context, float dpValue) {
