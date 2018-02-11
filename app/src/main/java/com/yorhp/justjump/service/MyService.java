@@ -55,24 +55,6 @@ public class MyService extends Service {
         createWindowView();
         imageRecognition = new ImageRecognition();
 
-
-        String[] templateFilePath = null;
-
-        File file = new File(MyApplication.rootDir + "opencv_template/");
-
-
-        if (file.isDirectory()) {
-
-            File[] array = file.listFiles();
-
-            templateFilePath = new String[array.length];
-            for (int i = 0; i < array.length; i++) {
-                templateFilePath[i] = array[i].getPath();
-            }
-        }
-
-        System.out.println("模板个数为：" + templateFilePath.length);
-
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -106,11 +88,11 @@ public class MyService extends Service {
                     if (file.exists()) {
                         file.delete();
                     }
-                    int time = (int) (distence * 1.38);
+                    int time = (int) (distence * 1.395);
                     String msg = "input touchscreen swipe 170 187 170 187 " + time;
                     execShellCmd(msg);
                     try {
-                        Thread.sleep(3000);
+                        Thread.sleep(3300);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

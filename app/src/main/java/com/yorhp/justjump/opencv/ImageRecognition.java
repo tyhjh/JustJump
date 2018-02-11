@@ -247,7 +247,7 @@ public class ImageRecognition {
         int blue2 = 61;// 取低两位
 
 
-        if ((Math.abs(red - red2)+Math.abs(green - green2) +Math.abs(blue - blue2)) < 25) {
+        if ((Math.abs(red - red2)+Math.abs(green - green2) +Math.abs(blue - blue2)) < 35) {
             return true;
         }
 
