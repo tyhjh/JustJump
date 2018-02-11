@@ -196,11 +196,6 @@ public class ImageRecognition {
         canvas.drawPoint(widthest, outY, paint);
         canvas.drawPoint(firstX, outY, paint);
         bitmapToPath(bitmap, "img_next_find");
-        try {
-            throw new Exception();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         System.out.println("没找到出来了x："+widthest+"，y："+outY+"/"+height);
         return new android.graphics.Point(firstX,outY);
     }
@@ -247,7 +242,7 @@ public class ImageRecognition {
         int blue2 = 61;// 取低两位
 
 
-        if ((Math.abs(red - red2)+Math.abs(green - green2) +Math.abs(blue - blue2)) < 35) {
+        if ((Math.abs(red - red2)+Math.abs(green - green2) +Math.abs(blue - blue2)) < 55) {
             return true;
         }
 

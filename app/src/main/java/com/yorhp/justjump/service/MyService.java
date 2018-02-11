@@ -34,7 +34,7 @@ public class MyService extends Service {
 
     String me = MyApplication.rootDir + "/opencv_me/me.png";
 
-    boolean start = true;
+    boolean start;
 
     ImageView btnView3;
     boolean isAdded;
