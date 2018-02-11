@@ -34,6 +34,7 @@ public class MyService extends Service {
 
     String me = MyApplication.rootDir + "/opencv_me/me.png";
 
+    boolean start = true;
 
     ImageView btnView3;
     boolean isAdded;
@@ -59,7 +60,7 @@ public class MyService extends Service {
             @Override
             public void run() {
                 int i = 0;
-                while (i >= 0) {
+                while (i >= 0 && start) {
                     File file1 = new File(MyApplication.rootDir + "/screenshots.png");
                     if (file1.exists())
                         file1.delete();
@@ -138,7 +139,6 @@ public class MyService extends Service {
         params3.y = 200;
 
 
-
         btnView3.setOnTouchListener(new View.OnTouchListener() {
 
             //保存悬浮框最后位置的变量
@@ -172,7 +172,13 @@ public class MyService extends Service {
         btnView3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                thread.start();
+                if (!start) {
+                    start = true;
+                    thread.start();
+                } else {
+                    start = false;
+                }
+
             }
         });
         windowManager.addView(btnView3, params3);
