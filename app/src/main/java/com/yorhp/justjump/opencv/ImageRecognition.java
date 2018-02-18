@@ -5,7 +5,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.support.annotation.NonNull;
 
+import com.yorhp.justjump.MainActivity;
 import com.yorhp.justjump.app.MyApplication;
 
 import org.opencv.core.Core;
@@ -17,11 +19,16 @@ import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import static com.yorhp.justjump.service.MyService.bitmapToPath;
+import static com.yorhp.justjump.service.MyService.me;
 
 public class ImageRecognition {
 
+    public static ArrayList<Integer> boderColor = MainActivity.boderColor;
+
+    public static boolean first = true;
 
     public int getDistence(String originmePath, String mePath, String originPath, int heightMe, int height) {
 
@@ -82,8 +89,11 @@ public class ImageRecognition {
     }
 
 
-
     public static android.graphics.Point getPoint(String originPath) {
+
+        if (boderColor.size() == 0) {
+            boderColor = borderColor();
+        }
 
         Bitmap workingBitmap = BitmapFactory.decodeFile(originPath);
         Bitmap bitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
@@ -98,65 +108,86 @@ public class ImageRecognition {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
 
-        System.out.println("宽度为："+bitmap.getWidth());
+        System.out.println("宽度为：" + bitmap.getWidth());
         int firstX = 0;
-        int outY=0;
+        int outY = 0;
 
         //保存第一次遇到的颜色
         int firstPoint = 0;
 
         //第一次进入的颜色
-        int inColor=0;
+        int inColor = 0;
 
-        android.graphics.Point firstInPoint=new android.graphics.Point(0,0);
+        int borderFirstY = 0;
+
+        android.graphics.Point firstInPoint = new android.graphics.Point(0, 0);
 
         //保存出踏板的横坐标
         int widthest = 0;
 
+        boolean lesswidth = false;
+
+        boolean estwidth = false;
+
+
+        //保存进踏板的坐标
+        android.graphics.Point widtdless = new android.graphics.Point(0, 0);
+
+
+        android.graphics.Point widtdest = new android.graphics.Point(0, 0);
+
         int firstInx = 0;
+
+        firstPoint = bitmap.getPixel(100, 100);
+
 
         for (int i = 0; i < height; i++) {
             boolean out = false;
             boolean in = false;
-            boolean isMe=false;
+            boolean isMe = false;
 
             for (int j = 0; j < width; j++) {//同一条线里面
 
-                //getPicturePixel(bitmap, j, i);
-
                 int clr = bitmap.getPixel(j, i);
 
-                if (firstPoint == 0) {//保存背景色
-                    firstPoint = clr;
+
+                if (!isMe && isMe(clr)) {
+                    isMe = true;
+                }
+
+                if (isMe && eque(clr, firstPoint)) {
+                    isMe = false;
                 }
 
 
-                if(!isMe&&isMe(clr)){
-                    isMe=true;
-                }
-
-                if(isMe&&eque(clr, firstPoint)){
-                    isMe=false;
-                }
-
-
-
-
-                if (firstInx == 0 && !eque(clr, firstPoint)&&!isMe) {//第一次进入
-                    inColor=clr;
+                if (firstInx == 0 && !eque(clr, firstPoint) && !isMe) {//第一次进入
+                    widtdless.x = j;
+                    inColor = bitmap.getPixel(j, i + 2);
                     firstInx = j;
-                    firstInPoint=new android.graphics.Point(j,i);
+                    firstInPoint = new android.graphics.Point(j, i);
                     in = true;
                     System.out.println("第一次进入" + j + "，" + i);
                     canvas.drawPoint(j, i, paint);
                     if (eque(bitmap.getPixel(j, i + 2), firstPoint)) {//出去了
-                        System.out.println("第一次进入马上出去了" + j);
+                        //System.out.println("第一次进入马上出去了" + j);
                         firstX = j;
                         out = true;
                     }
-                } else if (!isMe&&!in && !eque(clr, firstPoint)&&((eque(clr, inColor)||eque(clr, bitmap.getPixel(firstInPoint.x,firstInPoint.y))))) {//可能再次进入了
+                } else if (!isMe && !in && !eque(clr, firstPoint) && !isShadow(clr)) {//可能再次进入了
                     in = true;
-                    System.out.println("进去了：x"+j+"，y："+i);
+                    if (widtdless.x > j && !lesswidth) {
+                        widtdless = new android.graphics.Point(j, i);
+                    } else if (!lesswidth && findEst(bitmap, inColor, j, i)) {
+                        widtdless = new android.graphics.Point(j, i);
+                        canvas.drawPoint(j, i, paint);
+                        lesswidth = true;
+                        System.out.println("找到了最左边的点x：" + widtdless.x + " y：" + widtdless.y);
+                        if (estwidth) {
+                            return getPoint(firstInx, bitmap, canvas, widtdless, widtdest, inColor);
+                        }
+
+                    }
+                    //System.out.println("进去了：x" + j + "，y：" + i);
                 }
 
                 if (!out && in) {//进去了没出来
@@ -164,40 +195,75 @@ public class ImageRecognition {
                         firstX = (j + firstInx) / 2;
                         System.out.println("第一次进去后出来了");
                         out = true;
-                        firstInPoint=new android.graphics.Point((firstInPoint.x+j)/2,i);
+                        firstInPoint = new android.graphics.Point((firstInPoint.x + j) / 2, i);
                     }
 
 
-                    if (!out && in&& eque(clr, firstPoint)) {//出来了
-                        System.out.println("出来了x："+j+"，y："+i+"/"+width);
-                        if (j > (widthest)) {
+                    if (!out && in && (eque(clr, firstPoint) || isMe(clr))) {//出来了
+                        //System.out.println("出来了x：" + j + "，y：" + i + "/" + width);
+                        if (j > (widthest) && !estwidth) {
                             widthest = j;
-                            outY=i;
-                        } else if(!eque(bitmap.getPixel(j+2,i+2), inColor)){//
+                            outY = i;
+                        } else if (findEst(bitmap, inColor, j, i) && !estwidth) {//
+                            widtdest = new android.graphics.Point(j, i);
                             canvas.drawPoint(j, i, paint);
-                            canvas.drawPoint(firstX, i, paint);
-                            bitmapToPath(bitmap, "img_next_find");
-                            return new android.graphics.Point(firstX, i);
+                            estwidth = true;
+                            System.out.println("找到了最右边的点x：" + widtdest.x + " y：" + widtdest.y);
+                            if (lesswidth) {
+                                return getPoint(firstX, bitmap, canvas, widtdless, widtdest, inColor);
+                            }
                         }
                         out = true;
-                    }else if(j==1079){
+                    } else if (!out && in && j == 1079 && !estwidth) {
 
-                        System.out.println("出不来了"+(!out)+in+(eque(clr, firstPoint)));
 
+                        if (borderFirstY == 0) {
+                            borderFirstY = i;
+                        }
+
+                        if (findEst(bitmap, inColor, j, i)) {
+                            widtdest = new android.graphics.Point(j, (borderFirstY + i) / 2);
+                            canvas.drawPoint(j, i, paint);
+                            estwidth = true;
+                            if (lesswidth) {
+                                return getPoint(firstX, bitmap, canvas, widtdless, widtdest, inColor);
+                            }
+                            out = true;
+                        }
+
+
+                        /*System.out.println("出不来了" + (!out) + in + (eque(clr, firstPoint)));
                         System.out.println("R：" + Color.red(clr) + "，G：" + Color.green(clr) + "，B：" + Color.blue(clr));
-
-                        System.out.println("R：" + Color.red(firstPoint) + "，G：" + Color.green(firstPoint) + "，B：" + Color.blue(firstPoint));
-
+                        System.out.println("R：" + Color.red(firstPoint) + "，G：" + Color.green(firstPoint) + "，B：" + Color.blue(firstPoint));*/
                     }
                 }
             }
             i = i + 1;
         }
-        canvas.drawPoint(widthest, outY, paint);
-        canvas.drawPoint(firstX, outY, paint);
+
+
+        return getPoint(firstX, bitmap, canvas, widtdless, widtdest, inColor);
+    }
+
+
+    @NonNull
+    private static android.graphics.Point getPoint(int firstX, Bitmap bitmap, Canvas canvas, android.graphics.Point widtdless, android.graphics.Point widtdest, int inColor) {
+        int x = (widtdest.x + widtdless.x) / 2;
+        int y = (widtdest.y + widtdless.y) / 2 - 5;
+        if (bitmap.getPixel(x, y) != Color.WHITE && inColor != Color.WHITE && !first) {
+            x = firstX;
+            y = widtdest.y;
+        }
+
+        Paint paint2 = new Paint();
+        paint2.setColor(Color.YELLOW);
+        paint2.setStyle(Paint.Style.STROKE);//不填充
+        paint2.setStrokeWidth(4);  //线的宽度
+
+        canvas.drawPoint(x, y, paint2);
         bitmapToPath(bitmap, "img_next_find");
-        System.out.println("没找到出来了x："+widthest+"，y："+outY+"/"+height);
-        return new android.graphics.Point(firstX,outY);
+        first = false;
+        return new android.graphics.Point(x, y);
     }
 
     int count = 0;
@@ -220,7 +286,7 @@ public class ImageRecognition {
             return true;
         }
 
-        if ((Math.abs(red - red2)+Math.abs(green - green2) +Math.abs(blue - blue2)) < 25) {
+        if ((Math.abs(red - red2) + Math.abs(green - green2) + Math.abs(blue - blue2)) < 15) {
             return true;
         }
 
@@ -236,21 +302,60 @@ public class ImageRecognition {
         int blue = Color.blue(clr);// 取低两位
 
 
-        int red2 =53 ; // 取高两位
+        int red2 = 53; // 取高两位
         int green2 = 54;
-        ; // 取中两位
+        // 取中两位
         int blue2 = 61;// 取低两位
 
 
-        if ((Math.abs(red - red2)+Math.abs(green - green2) +Math.abs(blue - blue2)) < 55) {
+        if ((Math.abs(red - red2) + Math.abs(green - green2) + Math.abs(blue - blue2)) < 45) {
             return true;
         }
-
 
 
         return false;
 
     }
+
+    public static boolean isMes(int clr) {
+        for (int i = 0; i < boderColor.size(); i++) {
+            if (isLike(clr, boderColor.get(i)))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static boolean isShadow(int clr) {
+        int all = Color.blue(clr) + Color.green(clr) + Color.red(clr);
+        if (Math.abs(all - 477) < 15) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isLike(int clr, int clr2) {
+        int red = Color.red(clr); // 取高两位
+        int green = Color.green(clr);
+        // 取中两位
+        int blue = Color.blue(clr);// 取低两位
+
+
+        int red2 = Color.red(clr2); // 取高两位
+        int green2 = Color.green(clr2);
+        ; // 取中两位
+        int blue2 = Color.blue(clr2);// 取低两位
+
+
+        if ((Math.abs(red - red2) + Math.abs(green - green2) + Math.abs(blue - blue2)) < 40) {
+            return true;
+        }
+
+
+        return false;
+
+    }
+
 
     public class LikeResult {
         android.graphics.Point point;
@@ -292,6 +397,34 @@ public class ImageRecognition {
             }
         }
         f.delete();
+    }
+
+
+    public static boolean findEst(Bitmap bitmap, int inColor, int x, int y) {
+        for (int i = 0; i < 5; i++) {
+            if (isLike(bitmap.getPixel(x, y + i + 1), inColor)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static ArrayList<Integer> borderColor() {
+        ArrayList<Integer> boderColor = new ArrayList<Integer>();
+        Bitmap bitmap = BitmapFactory.decodeFile(me);
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int firstColor = bitmap.getPixel(1, 1);
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                int clr = bitmap.getPixel(j, i);
+                if (firstColor != clr) {
+                    boderColor.add(clr);
+                    break;
+                }
+            }
+        }
+        return boderColor;
     }
 
 

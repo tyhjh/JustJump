@@ -8,6 +8,8 @@ import android.util.Log;
 
 import com.squareup.picasso.LruCache;
 import com.squareup.picasso.Picasso;
+import com.yorhp.justjump.R;
+import com.yorhp.justjump.util.FileUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class MyApplication extends Application {
     public static final boolean ISDEBUG = true;
     public static ArrayList<Activity> activities = new ArrayList<>();
     public static String rootDir;
-    public static boolean isFirstLog=false;
+    public static boolean isFirstLog = false;
 
 
     public void onCreate() {
@@ -43,24 +45,12 @@ public class MyApplication extends Application {
 
     //文件夹初始化
     public void initDir() {
-        rootDir = Environment.getExternalStorageDirectory() + "/ATranscribeScreen/";
+        rootDir = Environment.getExternalStorageDirectory() + "/AJustJump/";
         File f1 = new File(rootDir);
         if (!f1.exists()) {
             f1.mkdirs();
         }
-        File f2 = new File(rootDir + "gif/");
-        if (!f2.exists()) {
-            f2.mkdirs();
-        }
-        File f3 = new File(rootDir + "mp4/");
-        if (!f3.exists()) {
-            f3.mkdirs();
-        }
 
-        File f4 = new File(rootDir + "download/");
-        if (!f4.exists()) {
-            f4.mkdirs();
-        }
 
         File f5 = new File(rootDir + "matching/");
         if (!f5.exists()) {
@@ -72,6 +62,15 @@ public class MyApplication extends Application {
         if (!f6.exists()) {
             f6.mkdirs();
         }
+
+        File f7 = new File(rootDir + "opencv_me/");
+        if (!f7.exists()) {
+            f7.mkdirs();
+        }
+
+        File file = new File(MyApplication.rootDir + "/opencv_me/me.png");
+        if (!file.exists())
+            FileUtil.copyFilesFromRaw(getApplicationContext(), R.raw.me, "me.png", f7.getPath());
 
 
     }
@@ -92,9 +91,6 @@ public class MyApplication extends Application {
             activities.get(i).finish();
         }
     }
-
-
-
 
 
 }

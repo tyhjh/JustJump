@@ -32,7 +32,7 @@ public class MyService extends Service {
     ImageRecognition imageRecognition;
 
 
-    String me = MyApplication.rootDir + "/opencv_me/me.png";
+    public static String me = MyApplication.rootDir + "/opencv_me/me.png";
 
     boolean start;
 
@@ -60,7 +60,12 @@ public class MyService extends Service {
             @Override
             public void run() {
                 int i = 0;
-                while (i >= 0 && start) {
+                while (i>= 0 && start) {
+
+                    File file = new File(screenPath);
+                    if (file.exists()) {
+                        file.delete();
+                    }
                     File file1 = new File(MyApplication.rootDir + "/screenshots.png");
                     if (file1.exists())
                         file1.delete();
@@ -80,16 +85,8 @@ public class MyService extends Service {
                     Bitmap bitmap_me = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * 0.4166), bitmap.getWidth(), (int) (bitmap.getHeight() * 0.2304));
                     File file_me = bitmapToPath(bitmap_me, "img_me");
                     distence = imageRecognition.getDistence(file_me.getPath(), me, next.getPath(), (int) (bitmap.getHeight() * 0.4166), (int) (bitmap.getHeight() * 0.3125));
-
-
                     System.out.println("距离为：" + distence);
-
-
-                    File file = new File(screenPath);
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                    int time = (int) (distence * 1.395);
+                    int time = (int) (distence * 1.41-distence/7000);
                     String msg = "input touchscreen swipe 170 187 170 187 " + time;
                     execShellCmd(msg);
                     try {
@@ -172,12 +169,18 @@ public class MyService extends Service {
         btnView3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!start) {
+
+                start = true;
+                thread.start();
+
+
+
+                /*if (!start) {
                     start = true;
                     thread.start();
                 } else {
                     start = false;
-                }
+                }*/
 
             }
         });
