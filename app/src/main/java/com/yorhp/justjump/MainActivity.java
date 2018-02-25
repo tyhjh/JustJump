@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Point point = getPoint(filepath);
+                        Point point = getPoint();
                         System.out.println("x：" + point.x + "，y：" + point.y);
                     }
                 });

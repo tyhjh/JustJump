@@ -8,6 +8,8 @@ import android.util.Log;
 
 import com.squareup.picasso.LruCache;
 import com.squareup.picasso.Picasso;
+import com.yorhp.justjump.R;
+import com.yorhp.justjump.util.FileUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,26 +43,16 @@ public class MyApplication extends Application {
         Picasso.setSingletonInstance(picasso);
     }
 
+
+
     //文件夹初始化
     public void initDir() {
-        rootDir = Environment.getExternalStorageDirectory() + "/ATranscribeScreen/";
+        rootDir = Environment.getExternalStorageDirectory() + "/AJustJump/";
         File f1 = new File(rootDir);
         if (!f1.exists()) {
             f1.mkdirs();
         }
-        File f2 = new File(rootDir + "gif/");
-        if (!f2.exists()) {
-            f2.mkdirs();
-        }
-        File f3 = new File(rootDir + "mp4/");
-        if (!f3.exists()) {
-            f3.mkdirs();
-        }
 
-        File f4 = new File(rootDir + "download/");
-        if (!f4.exists()) {
-            f4.mkdirs();
-        }
 
         File f5 = new File(rootDir + "matching/");
         if (!f5.exists()) {
@@ -73,8 +65,16 @@ public class MyApplication extends Application {
             f6.mkdirs();
         }
 
+        File f7 = new File(rootDir + "opencv_me/");
+        if (!f7.exists()) {
+            f7.mkdirs();
+        }
 
+        File file = new File(MyApplication.rootDir + "/opencv_me/me.png");
+        if (!file.exists())
+            FileUtil.copyFilesFromRaw(getApplicationContext(), R.raw.me, "me.png", f7.getPath());
     }
+
 
     //打印初始化
     public static void log(String key, String value) {

@@ -27,12 +27,12 @@ public class MyService extends Service {
 
 
     int distence = 0;
-    private String screenPath = MyApplication.rootDir + "/screenshots.png";
+    public static String screenPath = MyApplication.rootDir + "/screenshots.png";
 
     ImageRecognition imageRecognition;
 
 
-    String me = MyApplication.rootDir + "/opencv_me/me.png";
+    public static String mePath = MyApplication.rootDir + "/opencv_me/me.png";
 
     boolean start;
 
@@ -48,6 +48,7 @@ public class MyService extends Service {
 
     public MyService() {
 
+
     }
 
     @Override
@@ -60,7 +61,7 @@ public class MyService extends Service {
             @Override
             public void run() {
                 int i = 0;
-                while (i >= 0 && start) {
+                while (i == 0 && start) {
                     File file1 = new File(MyApplication.rootDir + "/screenshots.png");
                     if (file1.exists())
                         file1.delete();
@@ -74,12 +75,8 @@ public class MyService extends Service {
                         }
                         bitmap = BitmapFactory.decodeFile(screenPath);
                     }
-                    Bitmap bitmap_next = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * 0.3125), bitmap.getWidth(), (int) (bitmap.getHeight() * 0.2713));
-                    File next = bitmapToPath(bitmap_next, "img_next");
 
-                    Bitmap bitmap_me = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * 0.4166), bitmap.getWidth(), (int) (bitmap.getHeight() * 0.2304));
-                    File file_me = bitmapToPath(bitmap_me, "img_me");
-                    distence = imageRecognition.getDistence(file_me.getPath(), me, next.getPath(), (int) (bitmap.getHeight() * 0.4166), (int) (bitmap.getHeight() * 0.3125));
+                    distence = imageRecognition.getDistence();
 
 
                     System.out.println("距离为：" + distence);
@@ -89,8 +86,20 @@ public class MyService extends Service {
                     if (file.exists()) {
                         file.delete();
                     }
-                    int time = (int) (distence * 1.395);
-                    String msg = "input touchscreen swipe 170 187 170 187 " + time;
+                    int time=0;
+                    if(distence<400){
+                        time = (int) (distence * 1.395);
+                    }else if(distence<500){
+                        time = (int) (distence * 1.390);
+                    }else if(distence<600){
+                        time = (int) (distence * 1.385);
+                    }else if(distence<700){
+                        time = (int) (distence * 1.380);
+                    }else if(distence>700){
+                        time = (int) (distence * 1.375);
+                    }
+
+                    String msg = "input touchscreen swipe 560 1600 560 1600 " + time;
                     execShellCmd(msg);
                     try {
                         Thread.sleep(3300);
