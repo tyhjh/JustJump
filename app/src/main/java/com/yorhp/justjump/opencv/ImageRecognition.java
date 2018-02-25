@@ -159,7 +159,6 @@ public class ImageRecognition {
         for (int i = 0; i < height; i++) {
             boolean out = false;
             boolean in = false;
-            boolean isMe = false;
 
             for (int j = 0; j < width; j++) {//同一条线里面
 
@@ -172,16 +171,8 @@ public class ImageRecognition {
                 }
 
 
-                if (!isMe && isMe(clr)) {
-                    isMe = true;
-                }
 
-                if (isMe && eque(clr, firstPoint)) {
-                    isMe = false;
-                }
-
-
-                if (firstInx == 0 && !eque(clr, firstPoint) && !isMe) {//第一次进入
+                if (firstInx == 0 && !eque(clr, firstPoint)) {//第一次进入
                     inColor = clr;
                     firstInx = j;
                     firstInPoint = new android.graphics.Point(j, i);
@@ -193,9 +184,13 @@ public class ImageRecognition {
                         firstX = j;
                         out = true;
                     }
-                } else if (!isMe && !in && !eque(clr, firstPoint) && ((eque(clr, inColor) || eque(clr, bitmap.getPixel(firstInPoint.x, firstInPoint.y))))) {//可能再次进入了
+                } else if (!in && !eque(clr, firstPoint) && ((eque(clr, inColor) || eque(clr, bitmap.getPixel(firstInPoint.x, firstInPoint.y))))) {//可能再次进入了
                     in = true;
                     System.out.println("进去了：x" + j + "，y：" + i);
+
+
+
+
                 }
 
                 if (!out && in) {//进去了没出来

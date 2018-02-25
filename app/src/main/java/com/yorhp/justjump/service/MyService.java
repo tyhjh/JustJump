@@ -61,7 +61,7 @@ public class MyService extends Service {
             @Override
             public void run() {
                 int i = 0;
-                while (i == 0 && start) {
+                while (i >= 0 && start) {
                     File file1 = new File(MyApplication.rootDir + "/screenshots.png");
                     if (file1.exists())
                         file1.delete();
