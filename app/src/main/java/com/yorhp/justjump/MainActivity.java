@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.yorhp.justjump.app.MyApplication;
+import com.yorhp.justjump.opencv.ImageRecognition;
 import com.yorhp.justjump.service.MyService;
 
 import org.opencv.android.Utils;
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        ImageRecognition.ok=true;
                         Point point = getPoint();
                         System.out.println("x：" + point.x + "，y：" + point.y);
                     }

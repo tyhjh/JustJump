@@ -181,20 +181,21 @@ public class MyService extends Service {
         btnView3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!start) {
+              /*  if (!start) {
                     start = true;
-                    thread.start();
                 } else {
                     start = false;
-                }
-
+                }*/
+                start=true;
+                thread.start();
+                btnView3.setVisibility(View.INVISIBLE);
             }
         });
         windowManager.addView(btnView3, params3);
         isAdded = true;
     }
 
-    private void execShellCmd(String cmd) {
+    public static void execShellCmd(String cmd) {
         try {
             // 获取输出流
             Process process = Runtime.getRuntime().exec("su");
