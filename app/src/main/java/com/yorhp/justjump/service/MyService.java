@@ -87,17 +87,22 @@ public class MyService extends Service {
                         file.delete();
                     }
                     int time=0;
-                    if(distence<400){
-                        time = (int) (distence * 1.395);
+
+                    if(distence<300){
+                        time = (int) (distence * 1.41);
+                    }else if(distence<400){
+                        time = (int) (distence * 1.405);
                     }else if(distence<500){
-                        time = (int) (distence * 1.390);
+                        time = (int) (distence * 1.400);
                     }else if(distence<600){
-                        time = (int) (distence * 1.385);
+                        time = (int) (distence * 1.390);
                     }else if(distence<700){
                         time = (int) (distence * 1.380);
                     }else if(distence>700){
                         time = (int) (distence * 1.375);
                     }
+
+
 
                     String msg = "input touchscreen swipe 560 1600 560 1600 " + time;
                     execShellCmd(msg);
@@ -181,12 +186,12 @@ public class MyService extends Service {
         btnView3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-              /*  if (!start) {
+                if (!start) {
                     start = true;
                 } else {
                     start = false;
-                }*/
-                start=true;
+                }
+                //start=true;
                 thread.start();
                 btnView3.setVisibility(View.INVISIBLE);
             }

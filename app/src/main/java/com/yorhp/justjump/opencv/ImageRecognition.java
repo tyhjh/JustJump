@@ -17,6 +17,7 @@ import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import static com.yorhp.justjump.service.MyService.bitmapToPath;
 import static com.yorhp.justjump.service.MyService.execShellCmd;
@@ -28,6 +29,7 @@ public class ImageRecognition {
     public static int meX1, meX2, meY1, meY2;
     public static boolean ok = false;
     public static String img_clear = MyApplication.rootDir + "/img_clear.png";
+    public static ArrayList<String> imgs_find=new ArrayList<>();
 
 
     public int getDistence() {
@@ -52,7 +54,7 @@ public class ImageRecognition {
 
         //图像上画矩形
         Paint paint = new Paint();
-        paint.setColor(bitmap.getPixel((int) (bitmap.getHeight() * 0.32), 500));
+        paint.setColor(bitmap.getPixel(500,height+20));
         paint.setStyle(Paint.Style.FILL);//不填充
         canvas.drawRect(meX1, meY1 + heightMe, meX2, meY2 + heightMe, paint);
         bitmapToPath(workingBitmap, "img_clear");
@@ -64,7 +66,7 @@ public class ImageRecognition {
 
         int distence = (int) (Math.sqrt((point1.x - point2.x) * (point1.x - point2.x) + (point1.y + heightMe - point2.y - height) * (point1.y + heightMe - point2.y - height)));
 
-        return distence;
+        return distence+3;
     }
 
 
@@ -119,10 +121,13 @@ public class ImageRecognition {
 
     public static android.graphics.Point getPoint() {
         Bitmap bitmapx = BitmapFactory.decodeFile(img_clear);
-        Bitmap bitmap_next = bitmapx.createBitmap(bitmapx, 0, (int) (bitmapx.getHeight() * 0.3125), bitmapx.getWidth(), (int) (bitmapx.getHeight() * 0.2713));
-        String img_nextPath = "img_next";
-        File next = bitmapToPath(bitmap_next, img_nextPath);
-        String originPath = next.getPath();
+        Bitmap workingBitmap = bitmapx.createBitmap(bitmapx, 0, (int) (bitmapx.getHeight() * 0.3125), bitmapx.getWidth(), (int) (bitmapx.getHeight() * 0.2713));
+
+        String img_find="x_find"+(System.currentTimeMillis()+"").substring(7,13);
+
+        String filepath = MyApplication.rootDir + "/" + img_find + ".png";
+        imgs_find.add(filepath);
+
         if (!ok) {
             execShellCmd("screencap -p " + MyApplication.rootDir + "/screenshots"+System.currentTimeMillis()+".png");
             try {
@@ -130,9 +135,18 @@ public class ImageRecognition {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+            if(imgs_find.size()>3){
+                imgs_find.remove(0);
+            }
+
             return new android.graphics.Point(0, 0);
+        }else {
+            if(imgs_find.size()>3){
+                delete(imgs_find.get(0));
+                imgs_find.remove(0);
+            }
         }
-        Bitmap workingBitmap = BitmapFactory.decodeFile(originPath);
         Bitmap bitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
 
         Canvas canvas = new Canvas(bitmap);
@@ -184,9 +198,11 @@ public class ImageRecognition {
 
                 int clr = bitmap.getPixel(j, i);
 
+
                 if (firstPoint == 0) {//保存背景色
                     firstPoint = clr;
                 }
+
 
 
                 if (firstInx == 0 && !eque(clr, firstPoint)) {//第一次进入
@@ -201,21 +217,28 @@ public class ImageRecognition {
                         firstX = j;
                         out = true;
                     }
-                } else if (!in && !eque(clr, firstPoint) && ((eque(clr, inColor) || eque(clr, bitmap.getPixel(firstInPoint.x, firstInPoint.y))))) {//可能再次进入了
+                } else if (!in && !eque(clr, firstPoint)&&!eque(clr,177,149,101)) {//可能再次进入了
                     in = true;
                     //System.out.println("进去了：x" + j + "，y：" + i);
 
                     if (widthless > j) {
                         widthless = j;
-                    } else if (i<height-20&&!eque(bitmap.getPixel(j, i + 2), inColor)&&leftPoint==null) {
+                    } else if ((i<height-20&&!eque(bitmap.getPixel(j, i + 2), inColor)&&leftPoint==null)||j==0) {
                         leftPoint = new android.graphics.Point(j, i);
                         canvas.drawPoint(j, i, paint);
                         System.out.println("找到了最左的点");
                         if (rightPoint != null) {
                             int x = (rightPoint.x + leftPoint.x) / 2;
                             int y = (rightPoint.y + leftPoint.y) / 2;
+
+
+                            if(bitmap.getPixel(x,y)!=Color.WHITE){
+                                x=firstX;
+                                y=outY;
+                            }
+
                             canvas.drawPoint(x, y, paint2);
-                            bitmapToPath(bitmap, "img_next_find");
+                            bitmapToPath(bitmap, img_find);
                             return new android.graphics.Point(x, y);
                         }
                     }
@@ -242,14 +265,20 @@ public class ImageRecognition {
                             if (leftPoint != null) {
                                 int x = (rightPoint.x + leftPoint.x) / 2;
                                 int y = (rightPoint.y + leftPoint.y) / 2;
+
+                                if(bitmap.getPixel(x,y)!=Color.WHITE){
+                                    x=firstX;
+                                    y=outY;
+                                }
+
                                 canvas.drawPoint(x, y, paint2);
-                                bitmapToPath(bitmap, "img_next_find");
+                                bitmapToPath(bitmap, img_find);
                                 return new android.graphics.Point(x, y);
                             }
 
                         }
                         out = true;
-                    } else if (j == 1079) {
+                    } else if (j == width) {
                         if (eque(bitmap.getPixel(j, i), inColor)) {
                             widthest = j;
                             outY = i;
@@ -268,9 +297,8 @@ public class ImageRecognition {
         }
         canvas.drawPoint(widthest, outY, paint);
         canvas.drawPoint(firstX, outY, paint);
-        bitmapToPath(bitmap, "img_next_find");
+        bitmapToPath(bitmap, img_find);
         System.out.println("没找到出来了x：" + widthest + "，y：" + outY + "/" + height);
-
 
         return new android.graphics.Point(firstX, outY);
     }
@@ -296,7 +324,7 @@ public class ImageRecognition {
             return true;
         }
 
-        if ((Math.abs(red - red2) + Math.abs(green - green2) + Math.abs(blue - blue2)) < 25) {
+        if ((Math.abs(red - red2) <15&& Math.abs(green - green2) <15&& Math.abs(blue - blue2) < 15)) {
             return true;
         }
 
@@ -305,20 +333,18 @@ public class ImageRecognition {
 
     }
 
-    public static boolean isMe(int clr) {
+    public static boolean eque(int clr, int red2,int green2,int blue2) {
         int red = Color.red(clr); // 取高两位
         int green = Color.green(clr);
         ; // 取中两位
         int blue = Color.blue(clr);// 取低两位
 
 
-        int red2 = 53; // 取高两位
-        int green2 = 54;
-        ; // 取中两位
-        int blue2 = 61;// 取低两位
+        if (red == red2 && green == green2 && blue == blue2) {
+            return true;
+        }
 
-
-        if ((Math.abs(red - red2) + Math.abs(green - green2) + Math.abs(blue - blue2)) < 55) {
+        if (Math.abs(red - red2)<30&&Math.abs(green - green2)<30&&Math.abs(blue - blue2) <60) {
             return true;
         }
 
@@ -326,6 +352,7 @@ public class ImageRecognition {
         return false;
 
     }
+
 
     public class LikeResult {
         android.graphics.Point point;
