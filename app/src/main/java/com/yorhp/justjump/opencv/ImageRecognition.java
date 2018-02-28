@@ -66,7 +66,7 @@ public class ImageRecognition {
 
         int distence = (int) (Math.sqrt((point1.x - point2.x) * (point1.x - point2.x) + (point1.y + heightMe - point2.y - height) * (point1.y + heightMe - point2.y - height)));
 
-        return distence+3;
+        return distence;
     }
 
 
@@ -136,13 +136,13 @@ public class ImageRecognition {
                 e.printStackTrace();
             }
 
-            if(imgs_find.size()>3){
+            if(imgs_find.size()>=3){
                 imgs_find.remove(0);
             }
 
             return new android.graphics.Point(0, 0);
         }else {
-            if(imgs_find.size()>3){
+            if(imgs_find.size()>=3){
                 delete(imgs_find.get(0));
                 imgs_find.remove(0);
             }
@@ -217,7 +217,7 @@ public class ImageRecognition {
                         firstX = j;
                         out = true;
                     }
-                } else if (!in && !eque(clr, firstPoint)&&!eque(clr,177,149,101)) {//可能再次进入了
+                } else if (!in && !eque(clr, firstPoint)&&!like(clr,177,149,101)) {//可能再次进入了
                     in = true;
                     //System.out.println("进去了：x" + j + "，y：" + i);
 
@@ -232,10 +232,10 @@ public class ImageRecognition {
                             int y = (rightPoint.y + leftPoint.y) / 2;
 
 
-                            if(bitmap.getPixel(x,y)!=Color.WHITE){
+                            /*if(bitmap.getPixel(x,y)!=Color.WHITE){
                                 x=firstX;
                                 y=outY;
-                            }
+                            }*/
 
                             canvas.drawPoint(x, y, paint2);
                             bitmapToPath(bitmap, img_find);
@@ -253,7 +253,7 @@ public class ImageRecognition {
                     }
 
 
-                    if (!out && in && eque(clr, firstPoint)) {//出来了
+                    if (!out && in && eque(clr, firstPoint)&&!eque(clr,107,156,248)) {//出来了,防止模仿出错
                         //System.out.println("出来了x：" + j + "，y：" + i + "/" + width);
                         if (j > (widthest)) {
                             widthest = j;
@@ -266,10 +266,10 @@ public class ImageRecognition {
                                 int x = (rightPoint.x + leftPoint.x) / 2;
                                 int y = (rightPoint.y + leftPoint.y) / 2;
 
-                                if(bitmap.getPixel(x,y)!=Color.WHITE){
+                               /* if(bitmap.getPixel(x,y)!=Color.WHITE){
                                     x=firstX;
                                     y=outY;
-                                }
+                                }*/
 
                                 canvas.drawPoint(x, y, paint2);
                                 bitmapToPath(bitmap, img_find);
@@ -280,8 +280,23 @@ public class ImageRecognition {
                         out = true;
                     } else if (j == width) {
                         if (eque(bitmap.getPixel(j, i), inColor)) {
-                            widthest = j;
-                            outY = i;
+                            rightPoint = new android.graphics.Point(j, i);
+                            canvas.drawPoint(j, i, paint);
+                            System.out.println("找到了最右的点");
+                            if (leftPoint != null) {
+                                int x = (rightPoint.x + leftPoint.x) / 2;
+                                int y = (rightPoint.y + leftPoint.y) / 2;
+
+                               /* if(bitmap.getPixel(x,y)!=Color.WHITE){
+                                    x=firstX;
+                                    y=outY;
+                                }*/
+
+                                canvas.drawPoint(x, y, paint2);
+                                bitmapToPath(bitmap, img_find);
+                                return new android.graphics.Point(x, y);
+                            }
+
                         }
 
                         System.out.println("出不来了" + (!out) + in + (eque(clr, firstPoint)));
@@ -333,7 +348,7 @@ public class ImageRecognition {
 
     }
 
-    public static boolean eque(int clr, int red2,int green2,int blue2) {
+    public static boolean like(int clr, int red2,int green2,int blue2) {
         int red = Color.red(clr); // 取高两位
         int green = Color.green(clr);
         ; // 取中两位
@@ -345,6 +360,26 @@ public class ImageRecognition {
         }
 
         if (Math.abs(red - red2)<30&&Math.abs(green - green2)<30&&Math.abs(blue - blue2) <60) {
+            return true;
+        }
+
+
+        return false;
+
+    }
+
+    public static boolean eque(int clr, int red2,int green2,int blue2) {
+        int red = Color.red(clr); // 取高两位
+        int green = Color.green(clr);
+        ; // 取中两位
+        int blue = Color.blue(clr);// 取低两位
+
+
+        if (red == red2 && green == green2 && blue == blue2) {
+            return true;
+        }
+
+        if (Math.abs(red - red2)<4&&Math.abs(green - green2)<4&&Math.abs(blue - blue2) <4) {
             return true;
         }
 

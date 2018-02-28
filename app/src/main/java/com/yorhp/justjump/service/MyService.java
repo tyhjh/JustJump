@@ -90,16 +90,22 @@ public class MyService extends Service {
 
                     if(distence<300){
                         time = (int) (distence * 1.41);
+                        System.out.println("系数为：" + 1.41);
                     }else if(distence<400){
                         time = (int) (distence * 1.405);
+                        System.out.println("系数为：" + 1.405);
                     }else if(distence<500){
                         time = (int) (distence * 1.400);
+                        System.out.println("系数为：" + 1.400);
                     }else if(distence<600){
-                        time = (int) (distence * 1.390);
+                        time = (int) (distence * 1.385);
+                        System.out.println("系数为：" + 1.385);
                     }else if(distence<700){
-                        time = (int) (distence * 1.380);
-                    }else if(distence>700){
                         time = (int) (distence * 1.375);
+                        System.out.println("系数为：" + 1.375);
+                    }else if(distence>700){
+                        time = (int) (distence * 1.370);
+                        System.out.println("系数为：" + 1.370);
                     }
 
 
