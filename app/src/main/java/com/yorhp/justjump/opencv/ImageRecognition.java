@@ -29,7 +29,7 @@ public class ImageRecognition {
     public static int meX1, meX2, meY1, meY2;
     public static boolean ok = false;
     public static String img_clear = MyApplication.rootDir + "/img_clear.png";
-    public static ArrayList<String> imgs_find=new ArrayList<>();
+    public static ArrayList<String> imgs_find = new ArrayList<>();
 
 
     public int getDistence() {
@@ -54,7 +54,7 @@ public class ImageRecognition {
 
         //图像上画矩形
         Paint paint = new Paint();
-        paint.setColor(bitmap.getPixel(500,height+20));
+        paint.setColor(bitmap.getPixel(500, height + 20));
         paint.setStyle(Paint.Style.FILL);//不填充
         canvas.drawRect(meX1, meY1 + heightMe, meX2, meY2 + heightMe, paint);
         bitmapToPath(workingBitmap, "img_clear");
@@ -123,30 +123,32 @@ public class ImageRecognition {
         Bitmap bitmapx = BitmapFactory.decodeFile(img_clear);
         Bitmap workingBitmap = bitmapx.createBitmap(bitmapx, 0, (int) (bitmapx.getHeight() * 0.3125), bitmapx.getWidth(), (int) (bitmapx.getHeight() * 0.2713));
 
-        String img_find="x_find"+(System.currentTimeMillis()+"").substring(7,13);
+        String img_find = "x_find" +System.currentTimeMillis();
 
         String filepath = MyApplication.rootDir + "/" + img_find + ".png";
         imgs_find.add(filepath);
 
         if (!ok) {
-            execShellCmd("screencap -p " + MyApplication.rootDir + "/screenshots"+System.currentTimeMillis()+".png");
+            execShellCmd("screencap -p " + MyApplication.rootDir + "/screenshots" + System.currentTimeMillis() + ".png");
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            if(imgs_find.size()>=3){
+            if (imgs_find.size() >= 3) {
                 imgs_find.remove(0);
             }
 
             return new android.graphics.Point(0, 0);
-        }else {
-            if(imgs_find.size()>=3){
+        } else {
+            if (imgs_find.size() >= 3) {
                 delete(imgs_find.get(0));
                 imgs_find.remove(0);
             }
         }
+
+
         Bitmap bitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
 
         Canvas canvas = new Canvas(bitmap);
@@ -166,163 +168,194 @@ public class ImageRecognition {
         int height = bitmap.getHeight();
 
         System.out.println("宽度为：" + bitmap.getWidth());
-        int firstX = 0;
-        int outY = 0;
 
         //保存第一次遇到的颜色
-        int firstPoint = 0;
+        int backgrundColor = 0;
 
-        //第一次进入的颜色
-        int inColor = 0;
+        //第一次进入tab的颜色
+        int tabColor = 0;
 
-        android.graphics.Point firstInPoint = new android.graphics.Point(0, 0);
+        //顶点
+        android.graphics.Point topPoint = null;
 
-        //保存出踏板的横坐标
-        int widthest = 0;
+        //左边的点
+        android.graphics.Point leftPoint = new android.graphics.Point(0, 0);
 
-        int widthless = 10000;
+        //右边的点
+        android.graphics.Point rightPoint = new android.graphics.Point(0, 0);
 
-        int firstInx = 0;
+        //是不是纯色
+        boolean pureColor = true;
 
-        android.graphics.Point leftPoint = null;
-        android.graphics.Point rightPoint = null;
+        //找到了左边的
+        boolean leftFind = false;
+
+        //找到了右边的
+        boolean rightFind = false;
 
 
-        for (int i = 0; i < height; i++) {
+        for (int y = 0; y < height; y++) {
             boolean out = false;
             boolean in = false;
 
-            for (int j = 0; j < width; j++) {//同一条线里面
+            for (int x = 0; x < width; x++) {//同一条线里面
 
-                //getPicturePixel(bitmap, j, i);
+                int clr = bitmap.getPixel(x, y);
 
-                int clr = bitmap.getPixel(j, i);
+                if (backgrundColor == 0)//保存背景色
+                    backgrundColor = clr;
 
-
-                if (firstPoint == 0) {//保存背景色
-                    firstPoint = clr;
-                }
-
-
-
-                if (firstInx == 0 && !eque(clr, firstPoint)) {//第一次进入
-                    inColor = clr;
-                    firstInx = j;
-                    firstInPoint = new android.graphics.Point(j, i);
+                //进入
+                if (topPoint == null && !eque(clr, backgrundColor, 10)) {//--------------------第一次进入
+                    tabColor = clr;
+                    topPoint = new android.graphics.Point(0, 0);
+                    topPoint.x = x;
                     in = true;
-                    System.out.println("第一次进入" + j + "，" + i);
-                    canvas.drawPoint(j, i, paint);
-                    if (eque(bitmap.getPixel(j, i + 2), firstPoint)) {//出去了
-                        System.out.println("第一次进入马上出去了" + j);
-                        firstX = j;
+                    System.out.println("第一次进入" + x + "，" + y);
+                    if (eque(bitmap.getPixel(x, y + 1), backgrundColor, 10)) {
+                        System.out.println("第一次进入马上出去了" + x);
                         out = true;
                     }
-                } else if (!in && !eque(clr, firstPoint)&&!like(clr,177,149,101)) {//可能再次进入了
+                    pureColor = isPure(bitmap, clr, x, y);
+                } else if (!in && topPoint != null && equeTabColor(clr, tabColor)) {//-------------------真正进入tab
                     in = true;
-                    //System.out.println("进去了：x" + j + "，y：" + i);
-
-                    if (widthless > j) {
-                        widthless = j;
-                    } else if ((i<height-20&&!eque(bitmap.getPixel(j, i + 2), inColor)&&leftPoint==null)||j==0) {
-                        leftPoint = new android.graphics.Point(j, i);
-                        canvas.drawPoint(j, i, paint);
-                        System.out.println("找到了最左的点");
-                        if (rightPoint != null) {
-                            int x = (rightPoint.x + leftPoint.x) / 2;
-                            int y = (rightPoint.y + leftPoint.y) / 2;
-
-
-                            /*if(bitmap.getPixel(x,y)!=Color.WHITE){
-                                x=firstX;
-                                y=outY;
-                            }*/
-
-                            canvas.drawPoint(x, y, paint2);
-                            bitmapToPath(bitmap, img_find);
-                            return new android.graphics.Point(x, y);
+                    if (pureColor&& !leftFind) {//----------------------------------------------------------纯色
+                        if (leftPoint.x == 0 || leftPoint.x > x) {//----------进入的坐标在减小
+                            leftPoint.x = x;
+                            leftPoint.y = y;
+                        } else if (!equeTabColor(bitmap.getPixel(x, y + 2), tabColor)&&!leftFind) {//-------------------------------------找到了 leftPoint
+                            leftPoint.x = x;
+                            leftPoint.y = y;
+                            leftFind = true;
+                            System.out.println("纯色，leftPoint：" + x + "，" + y);
                         }
+                    } else if (!pureColor) {//-------------------------------------------------------------------非纯色，不用 leftPoint
+                        //System.out.println("非纯色，不用 leftPoint");
                     }
                 }
 
-                if (!out && in) {//进去了没出来
-                    if (firstInx != 0 && eque(clr, firstPoint) && firstX == 0) {//第一次进去后出来了
-                        firstX = (j + firstInx) / 2;
+
+                //出来
+                if (!out && in && !rightFind) {
+                    if (topPoint.y == 0 && eque(clr, backgrundColor, 10)) {//--------------------------第一次进去后出来
                         System.out.println("第一次进去后出来了");
+                        topPoint.x = (topPoint.x + x) / 2;
+                        topPoint.y = y;
                         out = true;
-                        firstInPoint = new android.graphics.Point((firstInPoint.x + j) / 2, i);
-                    }
-
-
-                    if (!out && in && eque(clr, firstPoint)&&!eque(clr,107,156,248)) {//出来了,防止模仿出错
-                        //System.out.println("出来了x：" + j + "，y：" + i + "/" + width);
-                        if (j > (widthest)) {
-                            widthest = j;
-                            outY = i;
-                        } else if (i<height-20&&!eque(bitmap.getPixel(j, i + 2), inColor)&&rightPoint==null) {//
-                            rightPoint = new android.graphics.Point(j, i);
-                            canvas.drawPoint(j, i, paint);
-                            System.out.println("找到了最右的点");
-                            if (leftPoint != null) {
-                                int x = (rightPoint.x + leftPoint.x) / 2;
-                                int y = (rightPoint.y + leftPoint.y) / 2;
-
-                               /* if(bitmap.getPixel(x,y)!=Color.WHITE){
-                                    x=firstX;
-                                    y=outY;
-                                }*/
-
-                                canvas.drawPoint(x, y, paint2);
-                                bitmapToPath(bitmap, img_find);
-                                return new android.graphics.Point(x, y);
-                            }
-
-                        }
+                    } else if (!out && in && equeOutbgColor(backgrundColor, x, y, bitmap) && !eque(clr, 107, 156, 248)) {//---------出来了,防止魔方出错
                         out = true;
-                    } else if (j == width) {
-                        if (eque(bitmap.getPixel(j, i), inColor)) {
-                            rightPoint = new android.graphics.Point(j, i);
-                            canvas.drawPoint(j, i, paint);
-                            System.out.println("找到了最右的点");
-                            if (leftPoint != null) {
-                                int x = (rightPoint.x + leftPoint.x) / 2;
-                                int y = (rightPoint.y + leftPoint.y) / 2;
-
-                               /* if(bitmap.getPixel(x,y)!=Color.WHITE){
-                                    x=firstX;
-                                    y=outY;
-                                }*/
-
-                                canvas.drawPoint(x, y, paint2);
-                                bitmapToPath(bitmap, img_find);
-                                return new android.graphics.Point(x, y);
-                            }
-
+                        if (rightPoint.x < x) {//出去的坐标在增大
+                            rightPoint.x = x;
+                            rightPoint.y = y;
+                        } else if (eque(bitmap.getPixel(x + 1, y + 1), backgrundColor, 10)) {//-----------------------------------------找到了 rightPoint
+                            rightPoint.x = x;
+                            rightPoint.y = y;
+                            System.out.println("找到了 rightPoint：" + x + "，" + y);
+                            rightFind = true;
                         }
-
-                        System.out.println("出不来了" + (!out) + in + (eque(clr, firstPoint)));
-
-                        System.out.println("R：" + Color.red(clr) + "，G：" + Color.green(clr) + "，B：" + Color.blue(clr));
-
-                        System.out.println("R：" + Color.red(firstPoint) + "，G：" + Color.green(firstPoint) + "，B：" + Color.blue(firstPoint));
-
+                    } else if (x == width-1) {//-------------------------------------------------碰壁了
+                        rightPoint = new android.graphics.Point(x, y);
+                        rightFind = true;
                     }
                 }
-            }
-            i = i + 1;
-        }
-        canvas.drawPoint(widthest, outY, paint);
-        canvas.drawPoint(firstX, outY, paint);
-        bitmapToPath(bitmap, img_find);
-        System.out.println("没找到出来了x：" + widthest + "，y：" + outY + "/" + height);
+                //开始判断是否结束
+                if (pureColor) {
+                    if (leftFind && rightFind) {
+                        canvas.drawPoint(topPoint.x, topPoint.y, paint);
+                        canvas.drawPoint(leftPoint.x, leftPoint.y, paint);
+                        canvas.drawPoint(rightPoint.x, rightPoint.y, paint);
+                        int centerX = (leftPoint.x + rightPoint.x) / 2;
+                        int centerY = (leftPoint.y + rightPoint.y) / 2;
+                        canvas.drawPoint(centerX, centerY, paint2);
+                        bitmapToPath(bitmap, img_find);
+                        return new android.graphics.Point(centerX, centerY);
+                    }
+                } else {
+                    if (rightFind) {
+                        canvas.drawPoint(topPoint.x, topPoint.y, paint);
+                        canvas.drawPoint(rightPoint.x, rightPoint.y, paint);
+                        int centerX = topPoint.x;
+                        int centerY = rightPoint.y;
+                        canvas.drawPoint(centerX, centerY, paint2);
+                        bitmapToPath(bitmap, img_find);
+                        return new android.graphics.Point(centerX, centerY);
+                    }
+                }
 
-        return new android.graphics.Point(firstX, outY);
+            }
+            y = y + 1;
+        }
+
+        if (pureColor) {
+            canvas.drawPoint(topPoint.x, topPoint.y, paint);
+            canvas.drawPoint(leftPoint.x, leftPoint.y, paint);
+            canvas.drawPoint(rightPoint.x, rightPoint.y, paint);
+            int centerX = (leftPoint.x + rightPoint.x) / 2;
+            int centerY = (leftPoint.y + rightPoint.y) / 2;
+            canvas.drawPoint(centerX, centerY, paint2);
+            bitmapToPath(bitmap, img_find);
+            return new android.graphics.Point(centerX, centerY);
+        } else {
+            canvas.drawPoint(topPoint.x, topPoint.y, paint);
+            canvas.drawPoint(rightPoint.x, rightPoint.y, paint);
+            int centerX = topPoint.x;
+            int centerY = rightPoint.y;
+            canvas.drawPoint(centerX, centerY, paint2);
+            bitmapToPath(bitmap, img_find);
+            return new android.graphics.Point(centerX, centerY);
+        }
+    }
+
+    //判断出去时候是否真的是出去了
+    private static boolean equeOutbgColor(int backgrundColor, int x, int y, Bitmap bitmap) {
+        int width = 6;
+        for (int i = 0; i < width; i++) {
+            if (x + i >= bitmap.getWidth() || !eque(backgrundColor, bitmap.getPixel(x + i, y), 10))
+                return false;
+        }
+        return true;
+    }
+
+    //判读是不是纯色
+    private static boolean isPure(Bitmap bitmap, int clr, int x, int y) {
+        int height = 8;
+        int width = 8;
+        for (int i = 1; i < width; i++) {
+            if (bitmap.getPixel(x + i, y + height) != clr || bitmap.getPixel(x - i, y + height) != clr) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
-    int count = 0;
 
 
-    public static boolean eque(int clr, int clr2) {
+    public static boolean eque(int clr, int clr2, int error) {
+        int red = Color.red(clr); // 取高两位
+        int green = Color.green(clr);
+        ; // 取中两位
+        int blue = Color.blue(clr);// 取低两位
+
+
+        int red2 = Color.red(clr2); // 取高两位
+        int green2 = Color.green(clr2);
+        ; // 取中两位
+        int blue2 = Color.blue(clr2);// 取低两位
+
+        if (red == red2 && green == green2 && blue == blue2) {
+            return true;
+        }
+
+        if ((Math.abs(red - red2) < error && Math.abs(green - green2) < error && Math.abs(blue - blue2) < error)) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public static boolean equeTabColor(int clr, int clr2) {
         int red = Color.red(clr); // 取高两位
         int green = Color.green(clr);
         ; // 取中两位
@@ -339,7 +372,7 @@ public class ImageRecognition {
             return true;
         }
 
-        if ((Math.abs(red - red2) <15&& Math.abs(green - green2) <15&& Math.abs(blue - blue2) < 15)) {
+        if ((Math.abs(red - red2) < 3 && Math.abs(green - green2) < 3 && Math.abs(blue - blue2) < 3)) {
             return true;
         }
 
@@ -348,7 +381,7 @@ public class ImageRecognition {
 
     }
 
-    public static boolean like(int clr, int red2,int green2,int blue2) {
+    public static boolean eque(int clr, int red2, int green2, int blue2) {
         int red = Color.red(clr); // 取高两位
         int green = Color.green(clr);
         ; // 取中两位
@@ -359,27 +392,7 @@ public class ImageRecognition {
             return true;
         }
 
-        if (Math.abs(red - red2)<30&&Math.abs(green - green2)<30&&Math.abs(blue - blue2) <60) {
-            return true;
-        }
-
-
-        return false;
-
-    }
-
-    public static boolean eque(int clr, int red2,int green2,int blue2) {
-        int red = Color.red(clr); // 取高两位
-        int green = Color.green(clr);
-        ; // 取中两位
-        int blue = Color.blue(clr);// 取低两位
-
-
-        if (red == red2 && green == green2 && blue == blue2) {
-            return true;
-        }
-
-        if (Math.abs(red - red2)<4&&Math.abs(green - green2)<4&&Math.abs(blue - blue2) <4) {
+        if (Math.abs(red - red2) < 4 && Math.abs(green - green2) < 4 && Math.abs(blue - blue2) < 4) {
             return true;
         }
 

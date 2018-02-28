@@ -99,7 +99,7 @@ public class MyService extends Service {
                         System.out.println("系数为：" + 1.400);
                     }else if(distence<600){
                         time = (int) (distence * 1.385);
-                        System.out.println("系数为：" + 1.385);
+                        System.out.println("系数为：" + 1.386);
                     }else if(distence<700){
                         time = (int) (distence * 1.375);
                         System.out.println("系数为：" + 1.375);
@@ -113,7 +113,7 @@ public class MyService extends Service {
                     String msg = "input touchscreen swipe 560 1600 560 1600 " + time;
                     execShellCmd(msg);
                     try {
-                        Thread.sleep(3300);
+                        Thread.sleep(3500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -199,7 +199,7 @@ public class MyService extends Service {
                 }
                 //start=true;
                 thread.start();
-                btnView3.setVisibility(View.INVISIBLE);
+                //btnView3.setVisibility(View.INVISIBLE);
             }
         });
         windowManager.addView(btnView3, params3);
