@@ -20,11 +20,14 @@ import com.yorhp.justjump.opencv.ImageRecognition;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.IOException;
 
 
 public class MyService extends Service {
 
+
+    static Process process = null;
+    static DataOutputStream os = null;
 
     int distence = 0;
     public static String screenPath = MyApplication.rootDir + "/screenshots.png";
@@ -48,24 +51,24 @@ public class MyService extends Service {
 
     public MyService() {
 
-
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        createWindowView();
+        File file1 = new File(screenPath);
+        if (file1.exists())
+            file1.delete();
         imageRecognition = new ImageRecognition();
-
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 int i = 0;
                 while (i >= 0 && start) {
-                    File file1 = new File(MyApplication.rootDir + "/screenshots.png");
+                    File file1 = new File(screenPath);
                     if (file1.exists())
                         file1.delete();
-                    execShellCmd("screencap -p " + MyApplication.rootDir + "/screenshots.png");
+                    execShellCmd("screencap -p " + screenPath);
                     Bitmap bitmap = BitmapFactory.decodeFile(screenPath);
                     while (bitmap == null) {
                         try {
@@ -86,34 +89,11 @@ public class MyService extends Service {
                     if (file.exists()) {
                         file.delete();
                     }
-                    int time=0;
-
-                    if(distence<300){
-                        time = (int) (distence * 1.41);
-                        System.out.println("系数为：" + 1.41);
-                    }else if(distence<400){
-                        time = (int) (distence * 1.405);
-                        System.out.println("系数为：" + 1.405);
-                    }else if(distence<500){
-                        time = (int) (distence * 1.400);
-                        System.out.println("系数为：" + 1.400);
-                    }else if(distence<600){
-                        time = (int) (distence * 1.385);
-                        System.out.println("系数为：" + 1.386);
-                    }else if(distence<700){
-                        time = (int) (distence * 1.375);
-                        System.out.println("系数为：" + 1.375);
-                    }else if(distence>700){
-                        time = (int) (distence * 1.370);
-                        System.out.println("系数为：" + 1.370);
-                    }
-
-
-
+                    int time = getTime();
                     String msg = "input touchscreen swipe 560 1600 560 1600 " + time;
                     execShellCmd(msg);
                     try {
-                        Thread.sleep(3500);
+                        Thread.sleep(2800);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -121,6 +101,91 @@ public class MyService extends Service {
                 }
             }
         });
+        createWindowView();
+        Thread auto=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    if (!start)
+                        execShellCmd("screencap -p " + screenPath);
+                    Bitmap bitmap = BitmapFactory.decodeFile(screenPath);
+                    while (bitmap == null) {
+                        try {
+                            Thread.sleep(300);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        bitmap = BitmapFactory.decodeFile(screenPath);
+                    }
+
+                    ImageRecognition.LikeResult likeResult = ImageRecognition.matchImageMe(screenPath, mePath);
+
+                    if (likeResult.getLikeLevel() > 0.6) {
+                        try {
+                            if(!start){
+                                start=true;
+                                thread.start();
+                            }
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }else {
+                        if(start){
+                            start=false;
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                }
+            }
+        });
+        //auto.start();
+
+    }
+
+    private int getTime() {
+        int time = 0;
+        /*if (distence < 200) {
+            time = (int) (distence * 1.430);
+        } else if (distence < 250) {
+            time = (int) (distence * 1.425);
+        } else if (distence < 300) {
+            time = (int) (distence * 1.420);
+        } else if (distence < 350) {
+            time = (int) (distence * 1.415);
+        } else if (distence < 400) {
+            time = (int) (distence * 1.405);
+        } else if (distence < 450) {
+            time = (int) (distence * 1.40);
+        } else if (distence < 500) {
+            time = (int) (distence * 1.395);
+        } else if (distence < 550) {
+            time = (int) (distence * 1.390);
+        } else if (distence < 600) {
+            time = (int) (distence * 1.385);
+        } else if (distence < 650) {
+            time = (int) (distence * 1.380);
+        } else if (distence < 700) {
+            time = (int) (distence * 1.372);
+        } else if (distence < 750) {
+            time = (int) (distence * 1.367);
+        } else if (distence > 700) {
+            time = (int) (distence * 1.360);
+        }*/
+
+        double k=(distence*(-0.0002)+1.49);
+        if(k>1.45){
+            k=1.45;
+        }
+        time= (int) (k *distence);
+
+        System.out.println("系数为："+k);
+        return time;
     }
 
     @Override
@@ -199,7 +264,7 @@ public class MyService extends Service {
                 }
                 //start=true;
                 thread.start();
-                //btnView3.setVisibility(View.INVISIBLE);
+                btnView3.setVisibility(View.INVISIBLE);
             }
         });
         windowManager.addView(btnView3, params3);
@@ -208,20 +273,17 @@ public class MyService extends Service {
 
     public static void execShellCmd(String cmd) {
         try {
-            // 获取输出流
-            Process process = Runtime.getRuntime().exec("su");
-            OutputStream outputStream = process.getOutputStream();
-            DataOutputStream dataOutputStream = new DataOutputStream(
-                    outputStream);
-            dataOutputStream.writeBytes(cmd);
-            dataOutputStream.flush();
-            dataOutputStream.close();
-            outputStream.close();
-        } catch (Throwable t) {
-            t.printStackTrace();
+            if (process == null) {
+                process = Runtime.getRuntime().exec("su");
+                os = new DataOutputStream(process.getOutputStream());
+            }
+            os.writeBytes(cmd);
+            os.writeBytes("\n");
+            os.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-
 
     public static File bitmapToPath(Bitmap bitmap, String name) {
         String filepath = MyApplication.rootDir + "/" + name + ".png";
@@ -249,7 +311,6 @@ public class MyService extends Service {
         return file;
     }
 
-
     public static int dip2px(Context context, float dpValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
@@ -260,6 +321,5 @@ public class MyService extends Service {
         return (int) (pxValue / scale + 0.5f);
 
     }
-
 
 }

@@ -4,26 +4,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@mipmap/img_bg"
     tools:context="com.yorhp.justjump.MainActivity">
 
-   <LinearLayout
-       android:orientation="vertical"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-       <Button
-           android:id="@+id/btn_proc"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:text="开始"
-           />
-       <ImageView
-           android:id="@+id/imageview_lena"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:contentDescription="结束"
-           />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-   </LinearLayout>
+        <Button
+            android:textSize="18sp"
+            android:textStyle="italic"
+            android:padding="10dp"
+            android:textColor="#f0888888"
+            android:background="?android:attr/selectableItemBackground"
+            android:id="@+id/btn_proc"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textAllCaps="false"
+            android:layout_marginBottom="100dp"
+            android:text="Just do it" />
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
