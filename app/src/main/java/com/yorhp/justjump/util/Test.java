@@ -138,12 +138,13 @@ public class Test {
                         topPoint.x = (topPoint.x + x) / 2;
                         topPoint.y = y;
                         out = true;
-                    } else if (!out && in && equeOutbgColor(backgrundColor, x, y, bitmap) && !eque(clr, 107, 156, 248)) {//---------出来了,防止魔方出错
+                    } else if (!out && in &&!equeTabColor(clr,tabColor)&& equeOutbgColor(backgrundColor, x, y, bitmap) && !eque(clr, 107, 156, 248)) {//---------出来了,防止魔方出错
                         out = true;
                         if (rightPoint.x < x) {//出去的坐标在增大
                             rightPoint.x = x;
                             rightPoint.y = y;
-                        } else if (y < bitmap.getHeight() - 5 && eque(bitmap.getPixel(x + 1, y + 3), backgrundColor, 14) && eque(bitmap.getPixel(x + 1, y + 2), backgrundColor, 14) && eque(bitmap.getPixel(x + 1, y + 4), backgrundColor, 14)) {//-----------------------------------------找到了 rightPoint
+                            System.out.println("出去的坐标在增大"+x);
+                        } else if (y < bitmap.getHeight() - 5 && eque(bitmap.getPixel(x + 1, y + 3), backgrundColor, 14) && eque(bitmap.getPixel(x + 1, y + 2), backgrundColor, 14) && eque(bitmap.getPixel(x + 1, y + 4), backgrundColor, 14)&&(x>rightPoint.x-10)) {//-----------------------------------------找到了 rightPoint
                             rightPoint.y = y;
                             rightPoint.x = x;
                             rightFind = true;
@@ -415,7 +416,7 @@ public class Test {
     private static boolean equeOutbgColor(int backgrundColor, int x, int y, Bitmap bitmap) {
         int width = 6;
         for (int i = 0; i < width; i++) {
-            if (x + i >= bitmap.getWidth() || !eque(backgrundColor, bitmap.getPixel(x + i, y), 15))
+            if (x + i >= bitmap.getWidth() || !eque(backgrundColor, bitmap.getPixel(x + i, y), 10))
                 return false;
         }
         return true;
@@ -424,7 +425,7 @@ public class Test {
     //判读是不是纯色
     private static boolean isPure(Bitmap bitmap, int clr, int x, int y) {
         int height = 8;
-        int width = 8;
+        int width = 6;
         for (int i = 1; i < width; i++) {
             if (!equeTabColor(bitmap.getPixel(x + i, y + height),clr)|| !equeTabColor(bitmap.getPixel(x - i, y + height),clr)) {
                 //System.out.println("第一个："+Color.red(clr)+"，"+Color.green(clr)+"，"+Color.blue(clr)+"x+i："+(x+i)+"y+height："+(y + height));

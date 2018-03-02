@@ -275,7 +275,7 @@ public class ImageRecognition {
                         topPoint.x = (topPoint.x + x) / 2;
                         topPoint.y = y;
                         out = true;
-                    } else if (!out && in && equeOutbgColor(backgrundColor, x, y, bitmap) && !eque(clr, 107, 156, 248)) {//---------出来了,防止魔方出错
+                    } else if (!out && in && !equeTabColor(clr,tabColor)&&equeOutbgColor(backgrundColor, x, y, bitmap) && !eque(clr, 107, 156, 248)) {//---------出来了,防止魔方出错
                         out = true;
                         if (rightPoint.x < x) {//出去的坐标在增大
                             rightPoint.x = x;
@@ -352,7 +352,7 @@ public class ImageRecognition {
     private static boolean equeOutbgColor(int backgrundColor, int x, int y, Bitmap bitmap) {
         int width = 6;
         for (int i = 0; i < width; i++) {
-            if (x + i >= bitmap.getWidth() || !eque(backgrundColor, bitmap.getPixel(x + i, y), 15))
+            if (x + i >= bitmap.getWidth() || !eque(backgrundColor, bitmap.getPixel(x + i, y), 10))
                 return false;
         }
         return true;
