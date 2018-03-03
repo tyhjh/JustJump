@@ -60,9 +60,14 @@ public class MyApplication extends Application {
         }
 
 
-        File f6 = new File(rootDir + "opencv_template/");
+        File f6 = new File(rootDir + "check/");
         if (!f6.exists()) {
             f6.mkdirs();
+        }
+
+        File f9 = new File(rootDir + "grade/");
+        if (!f9.exists()) {
+            f9.mkdirs();
         }
 
         File f7 = new File(rootDir + "opencv_me/");

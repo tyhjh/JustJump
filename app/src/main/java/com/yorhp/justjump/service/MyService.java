@@ -102,7 +102,7 @@ public class MyService extends Service {
             }
         });
         createWindowView();
-        Thread auto=new Thread(new Runnable() {
+        Thread auto = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -122,17 +122,17 @@ public class MyService extends Service {
 
                     if (likeResult.getLikeLevel() > 0.6) {
                         try {
-                            if(!start){
-                                start=true;
+                            if (!start) {
+                                start = true;
                                 thread.start();
                             }
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                    }else {
-                        if(start){
-                            start=false;
+                    } else {
+                        if (start) {
+                            start = false;
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException e) {
@@ -178,13 +178,13 @@ public class MyService extends Service {
             time = (int) (distence * 1.360);
         }*/
 
-        double k=(distence*(-0.0002)+1.49);
-        if(k>1.45){
-            k=1.45;
+        double k = (distence * (-0.0002) + 1.49);
+        if (k > 1.45) {
+            k = 1.45;
         }
-        time= (int) (k *distence);
+        time = (int) (k * distence);
 
-        System.out.println("系数为："+k);
+        System.out.println("系数为：" + k);
         return time;
     }
 
@@ -254,6 +254,7 @@ public class MyService extends Service {
         });
 
 
+        final int[] time = {0};
         btnView3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -264,6 +265,23 @@ public class MyService extends Service {
                 }
                 //start=true;
                 thread.start();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(60000);
+                            time[0]++;
+                            if (time[0] > 30) {
+                                start = false;
+                                Thread.sleep(5000);
+                                start = true;
+                                thread.start();
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
                 btnView3.setVisibility(View.INVISIBLE);
             }
         });

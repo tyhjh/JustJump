@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.TextView;
 
 import com.yorhp.justjump.opencv.ImageRecognition;
 import com.yorhp.justjump.service.MyService;
@@ -15,7 +15,7 @@ import com.yorhp.justjump.service.MyService;
 public class MainActivity extends AppCompatActivity {
 
 
-    private Button btnProc;
+    private TextView btnProc,btn_test;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,23 +31,28 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("opencv_java");
         final Intent intent = new Intent(this, MyService.class);
 
-        btnProc = (Button) findViewById(R.id.btn_proc);
+
+        btnProc = (TextView) findViewById(R.id.btn_proc);
         btnProc.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
+                startService(intent);
+                moveTaskToBack(true);
+            }
+        });
 
-                Thread thread = new Thread(new Runnable() {
+        btn_test= (TextView) findViewById(R.id.btn_test);
+        btn_test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
                     @Override
                     public void run() {
                         ImageRecognition.ok=true;
                         com.yorhp.justjump.util.Test.erroTest();
                     }
-                });
-
-                //thread.start();
-                startService(intent);
-                moveTaskToBack(true);
+                }).start();
             }
         });
 

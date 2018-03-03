@@ -34,8 +34,8 @@ public class ImageRecognition {
     public static double shotHeight = 0.224;
     public static double shotStart = 0.3;
 
-    public static double shotHeightMe = 0.2;
-    public static double shotStartMe = 0.43;
+    public static double shotHeightMe = 0.23;
+    public static double shotStartMe = 0.4;
 
 
     public int getDistence() {
@@ -131,15 +131,15 @@ public class ImageRecognition {
         Bitmap workingBitmap = bitmapx.createBitmap(bitmapx, 0, (int) (bitmapx.getHeight() * shotStart), bitmapx.getWidth(), (int) (bitmapx.getHeight() * shotHeight));
         String next_find="next_" + System.currentTimeMillis();
         bitmapToPath(workingBitmap, next_find);
-        String next_find_path=MyApplication.rootDir + "/" + next_find + ".png";
+        String next_find_path=MyApplication.rootDir +"check/"+ next_find + ".png";
         String img_find = "x_find" + System.currentTimeMillis();
 
-        String filepath = MyApplication.rootDir + "/" + img_find + ".png";
+        String filepath = MyApplication.rootDir + "check/" + img_find + ".png";
         imgs_find.add(filepath);
         nexts_find.add(next_find_path);
 
         if (!ok) {
-            execShellCmd("screencap -p " + MyApplication.rootDir + "/screenshots" + System.currentTimeMillis() + ".png");
+            execShellCmd("screencap -p " + MyApplication.rootDir + "grade/screenshots" + System.currentTimeMillis() + ".png");
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
@@ -147,10 +147,10 @@ public class ImageRecognition {
             }
 
             if (imgs_find.size() >= 3) {
-                imgs_find.remove(0);
+                imgs_find.clear();
             }
             if (nexts_find.size() >= 3) {
-                nexts_find.remove(0);
+                nexts_find.clear();
             }
 
 
