@@ -43,11 +43,6 @@ public class Test {
         paint.setStrokeWidth(2);  //线的宽度
 
 
-        Paint paint2 = new Paint();
-        paint2.setColor(Color.BLACK);
-        paint2.setStyle(Paint.Style.STROKE);//不填充
-        paint2.setStrokeWidth(2);  //线的宽度
-
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
 
@@ -93,12 +88,15 @@ public class Test {
 
                 //进入
                 if (topPoint == null && !eque(clr, backgrundColor, 10)) {//--------------------第一次进入
-                    if(x>1){
-                        backgrundColor=bitmap.getPixel(x-1,y);
+                    tabColor = bitmap.getPixel(x, y + 2);
+
+
+                    if (x > 1) {
+                        backgrundColor = bitmap.getPixel(x - 1, y);
                     }
-                    tabColor = bitmap.getPixel(x, y+2);
                     topPoint = new android.graphics.Point(0, 0);
                     topPoint.x = x;
+                    topPoint.y = 0;
                     in = true;
                     System.out.println("第一次进入" + x + "，" + y);
                     if (eque(bitmap.getPixel(x, y + 1), backgrundColor, 10)) {
@@ -138,13 +136,12 @@ public class Test {
                         topPoint.x = (topPoint.x + x) / 2;
                         topPoint.y = y;
                         out = true;
-                    } else if (!out && in &&!equeTabColor(clr,tabColor)&& equeOutbgColor(backgrundColor, x, y, bitmap) && !eque(clr, 107, 156, 248)) {//---------出来了,防止魔方出错
+                    } else if (!out && in && !equeTabColor(clr, tabColor) && equeOutbgColor(backgrundColor, x, y, bitmap) && !eque(clr, 107, 156, 248)) {//---------出来了,防止魔方出错
                         out = true;
                         if (rightPoint.x < x) {//出去的坐标在增大
                             rightPoint.x = x;
                             rightPoint.y = y;
-                            System.out.println("出去的坐标在增大"+x);
-                        } else if (y < bitmap.getHeight() - 5 && eque(bitmap.getPixel(x + 1, y + 3), backgrundColor, 14) && eque(bitmap.getPixel(x + 1, y + 2), backgrundColor, 14) && eque(bitmap.getPixel(x + 1, y + 4), backgrundColor, 14)&&(x>rightPoint.x-10)) {//-----------------------------------------找到了 rightPoint
+                        } else if (y < bitmap.getHeight() - 5 && eque(bitmap.getPixel(x + 1, y + 3), backgrundColor, 14) && eque(bitmap.getPixel(x + 1, y + 2), backgrundColor, 14) && eque(bitmap.getPixel(x + 1, y + 4), backgrundColor, 14)) {//-----------------------------------------找到了 rightPoint
                             rightPoint.y = y;
                             rightPoint.x = x;
                             rightFind = true;
@@ -160,19 +157,27 @@ public class Test {
                 if (pureColor) {
                     if (leftFind && rightFind) {
 
+                        int centerX = (leftPoint.x + rightPoint.x) / 2;
+                        int centerY = (leftPoint.y + rightPoint.y) / 2;
+
                         canvas.drawPoint(topPoint.x, topPoint.y, paint);
                         canvas.drawPoint(leftPoint.x, leftPoint.y, paint);
                         canvas.drawPoint(rightPoint.x, rightPoint.y, paint);
 
-                        int centerX = (leftPoint.x + rightPoint.x) / 2;
-                        int centerY = (leftPoint.y + rightPoint.y) / 2;
 
                         if (isWall) {
                             centerX = topPoint.x;
                             centerY = leftPoint.y;
                         }
+                        //paint.setColor(Color.BLACK);
+                        //canvas.drawPoint(centerX, centerY, paint);
 
-                        canvas.drawPoint(centerX, centerY, paint2);
+                        android.graphics.Point center = getPointCenter(centerX, centerY, tabColor, topPoint.y, bitmap);
+                        centerX = center.x;
+                        centerY = center.y;
+                        paint.setColor(Color.MAGENTA);
+                        canvas.drawPoint(centerX, centerY, paint);
+
                         bitmapToPath(bitmap, img_find);
                         return new android.graphics.Point(centerX, centerY);
                     }
@@ -182,12 +187,19 @@ public class Test {
                         canvas.drawPoint(rightPoint.x, rightPoint.y, paint);
                         int centerX = topPoint.x;
                         int centerY = rightPoint.y;
-                        canvas.drawPoint(centerX, centerY, paint2);
+                        //paint.setColor(Color.BLACK);
+                        //canvas.drawPoint(centerX, centerY, paint);
+
+                        android.graphics.Point center = getPointCenter(centerX, centerY, tabColor, topPoint.y, bitmap);
+                        centerX = center.x;
+                        centerY = center.y;
+                        paint.setColor(Color.MAGENTA);
+                        canvas.drawPoint(centerX, centerY, paint);
+
                         bitmapToPath(bitmap, img_find);
                         return new android.graphics.Point(centerX, centerY);
                     }
                 }
-
             }
             y = y + 1;
         }
@@ -198,7 +210,15 @@ public class Test {
             canvas.drawPoint(rightPoint.x, rightPoint.y, paint);
             int centerX = (leftPoint.x + rightPoint.x) / 2;
             int centerY = (leftPoint.y + rightPoint.y) / 2;
-            canvas.drawPoint(centerX, centerY, paint2);
+            //paint.setColor(Color.BLACK);
+            //canvas.drawPoint(centerX, centerY, paint);
+
+            android.graphics.Point center = getPointCenter(centerX, centerY, tabColor, topPoint.y, bitmap);
+            centerX = center.x;
+            centerY = center.y;
+            paint.setColor(Color.MAGENTA);
+            canvas.drawPoint(centerX, centerY, paint);
+
             bitmapToPath(bitmap, img_find);
             return new android.graphics.Point(centerX, centerY);
         } else {
@@ -206,7 +226,15 @@ public class Test {
             canvas.drawPoint(rightPoint.x, rightPoint.y, paint);
             int centerX = topPoint.x;
             int centerY = rightPoint.y;
-            canvas.drawPoint(centerX, centerY, paint2);
+            //paint.setColor(Color.BLACK);
+            //canvas.drawPoint(centerX, centerY, paint);
+
+            android.graphics.Point center = getPointCenter(centerX, centerY, tabColor, topPoint.y, bitmap);
+            centerX = center.x;
+            centerY = center.y;
+            paint.setColor(Color.MAGENTA);
+            canvas.drawPoint(centerX, centerY, paint);
+
             bitmapToPath(bitmap, img_find);
             return new android.graphics.Point(centerX, centerY);
         }
@@ -484,6 +512,112 @@ public class Test {
 
         return false;
 
+    }
+
+    //判断白点，找中点
+    private static android.graphics.Point getPointCenter(int centerX, int centerY, int tabColor, int topPointY, Bitmap bitmap) {
+        int x = centerX, y = centerY;
+        int topY = 0, bottomY = 0;
+        int leftX = 0, rightX = 0;
+
+
+        System.out.println("纠正了："+centerX+"，"+centerY);
+
+        if (!eque(tabColor,245,245,245)) {//有白点
+            if (eque(bitmap.getPixel(x, y),245,245,245)) {//坐标计算小错
+                for (int i = centerY; i > centerY - 24; i--) {//找到topY
+                    if ( !eque(bitmap.getPixel(x, i),245,245,245)) {
+                        topY = i;
+                        break;
+                    }
+                }
+
+                for (int i = centerY; i < centerY + 24; i++) {//找到bottomY
+                    if (!eque(bitmap.getPixel(x, i) ,245,245,245)) {
+                        bottomY = i;
+                        break;
+                    }
+                }
+
+                if (bottomY != 0 && topY != 0 && bottomY - topY < 26
+                        &&  eque(bitmap.getPixel(x, (bottomY + topY) / 2),245,245,245)) {//找到y
+                    y = (bottomY + topY) / 2;
+                }
+
+
+                for (int i = centerX; i > centerX - 41; i--) {//找到leftX
+                    if (!eque(bitmap.getPixel(i, y),245,245,245)){
+                        leftX=i;
+                        break;
+                    }
+                }
+
+
+                for (int i = centerX; i < centerX + 41; i++) {//找到rightX
+                    if (!eque(bitmap.getPixel(i, y),245,245,245)){
+                        rightX=i;
+                        break;
+                    }
+                }
+
+                if (rightX != 0 && leftX != 0 && rightX - leftX < 41
+                        &&  eque(bitmap.getPixel((rightX + leftX) / 2,y),245,245,245)) {//找到x
+                    x = (leftX + rightX) / 2;
+                }
+
+            } else {//坐标计算错误
+
+                System.out.println("坐标计算错误");
+                for(int i=centerY;i>topPointY;i--){
+                    if(bottomY==0&&eque(bitmap.getPixel(centerX, i),245,245,245)){
+                        bottomY=i;
+                        i--;
+                        System.out.println("坐标计算错误1："+bottomY);
+                    }
+
+                    if(bottomY!=0&&!eque(bitmap.getPixel(centerX, i),245,245,245)){
+                        topY=i;
+                        System.out.println("坐标计算错误2："+topY);
+                        break;
+                    }
+                }
+
+                if(bottomY-topY<26&&eque(bitmap.getPixel(centerX, (bottomY + topY) / 2),245,245,245)){
+                    y=(bottomY + topY) / 2;
+                    System.out.println("Y出错了，并且纠正了："+y);
+                }
+
+
+                for (int i = centerX; i > centerX - 41; i--) {//找到leftX
+                    if (!eque(bitmap.getPixel(i, y),245,245,245)){
+                        leftX=i;
+                        System.out.println("坐标计算错误3："+leftX);
+                        break;
+                    }
+                }
+
+
+                for (int i = centerX; i < centerX + 41; i++) {//找到rightX
+                    if (!eque(bitmap.getPixel(i, y),245,245,245)){
+                        rightX=i;
+                        System.out.println("坐标计算错误4："+rightX);
+                        break;
+                    }
+                }
+
+
+
+                if (rightX != 0 && leftX != 0 && rightX - leftX < 41
+                        &&  eque(bitmap.getPixel((rightX + leftX) / 2,y),245,245,245)) {//找到x
+                    x = (leftX + rightX) / 2;
+                    System.out.println("坐标计算错误5");
+                }
+
+
+            }
+        }
+
+        return new android.graphics.Point(x, y);
     }
 
     public static boolean eque(int clr, int red2, int green2, int blue2) {

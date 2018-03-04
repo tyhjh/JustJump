@@ -178,13 +178,17 @@ public class MyService extends Service {
             time = (int) (distence * 1.360);
         }*/
 
-        double k = (distence * (-0.0002) + 1.49);
-        if (k > 1.45) {
-            k = 1.45;
+        double k = (distence * (-0.00019) + 1.49);
+        if (k > 1.417) {
+            k = 1.417;
         }
         time = (int) (k * distence);
 
+
         System.out.println("系数为：" + k);
+
+        //time = (int) (1.4 * distence);
+
         return time;
     }
 
