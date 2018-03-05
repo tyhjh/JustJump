@@ -117,6 +117,9 @@ public class Test {
                         if (leftPoint.x == 0 || leftPoint.x > x) {//----------进入的坐标在减小
                             leftPoint.x = x;
                             leftPoint.y = y;
+                            if(leftPoint.x<2){
+                                pureColor=false;
+                            }
                         } else if (!equeTabColor(bitmap.getPixel(x, y + 2), tabColor) && !leftFind) {//-------------------------------------找到了 leftPoint
                             leftPoint.x = x;
                             leftPoint.y = y;
