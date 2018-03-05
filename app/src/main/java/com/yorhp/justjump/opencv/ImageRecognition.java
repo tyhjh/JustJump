@@ -140,12 +140,6 @@ public class ImageRecognition {
 
         if (!ok) {
             execShellCmd("screencap -p " + MyApplication.rootDir + "grade/screenshots" + System.currentTimeMillis() + ".png");
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
 
             if (imgs_find.size() >= 4) {
                 imgs_find.clear();

@@ -272,17 +272,20 @@ public class MyService extends Service {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        try {
-                            Thread.sleep(60000);
-                            time[0]++;
-                            if (time[0] > 30) {
-                                start = false;
-                                Thread.sleep(5000);
-                                start = true;
-                                thread.start();
+                        while (true) {
+                            try {
+                                Thread.sleep(60000);
+                                time[0]++;
+                                if (time[0] > 50) {
+                                    start = false;
+                                    Thread.sleep(5000);
+                                    time[0]=0;
+                                    start = true;
+                                    thread.start();
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
                         }
                     }
                 }).start();
