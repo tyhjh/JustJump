@@ -1,12 +1,9 @@
-﻿# Android上实现微信跳一跳外挂
-
-标签（空格分隔）： Android
-
----
-
 原文链接：https://www.zybuluo.com/Tyhj/note/1041200
 
 最近微信跳一跳很火，跳一跳外挂在网上也很火，自己是搞APP开发的，不做一个跳一跳的外挂都不好意思说是程序员了。
+
+![C45CFBAB8F6B0AEE91CE30C767F515BD.jpg](http://upload-images.jianshu.io/upload_images/4906791-a6e103c656c28e0b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/240)
+
 
 ### 实现要点
 其实就是两点，一是判断距离，二是自动点击，至于距离和点击时间的关系，其实就是距离（px）乘以1.4毫秒（在1080P上，其他差不多）。
@@ -71,7 +68,7 @@ outputStream.close();
 
 优点就是想跳哪里跳哪里，想跳多少分跳多少分，还可以故意跳偏躲过反外挂机制；缺点就是需要自己动手，花时间，而且执行adb命令会有2秒的延迟，其实外部adb命令也是有延迟的，避免不了
 
-![image](http://upload-images.jianshu.io/upload_images/4906791-c41e25bd71fe9d2a.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/240)
+![image](http://upload-images.jianshu.io/upload_images/4906791-c41e25bd71fe9d2a.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/140)
 
 #####全自动版本
 第一个版本做出来后我自己去跳了几次，几千分没问题，但是要动手太麻烦，那就只能用图象识别了。图象识别我看了一下OpenCV，有Android版本要自己编译一下，还要用到NDK编程，也有Java版本可以直接拿来用，就是用到其中的图象匹配，有两种方法，一种简单点是模板匹配，一种复杂一点是特征匹配。就是一张截图用模板来匹配找到模板在截图中的位置。根据跳一跳程序的特点，我们只需要截取图象的一部分而已。
@@ -87,7 +84,7 @@ Bitmap bitmap = BitmapFactory.decodeFile(screenPath);
 Bitmap bitmap_next = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * 0.3125), bitmap.getWidth(), (int) (bitmap.getHeight() * 0.2713));
 ```
 
-![image](http://upload-images.jianshu.io/upload_images/4906791-b5be88bf23670ede.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/340)
+![image](http://upload-images.jianshu.io/upload_images/4906791-b5be88bf23670ede.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/240)
 
 
 ```java
@@ -95,7 +92,7 @@ Bitmap bitmap_next = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * 
 Bitmap bitmap_me = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * 0.4166), bitmap.getWidth(), (int) (bitmap.getHeight() * 0.2304));
 ```
 
-![image](http://upload-images.jianshu.io/upload_images/4906791-f0040f1dddeaa7ea.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/340)
+![image](http://upload-images.jianshu.io/upload_images/4906791-f0040f1dddeaa7ea.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/240)
 
 
 我试了一下特征匹配，Android程序会崩，我查了一下原因可能是运算量比较大，反正搞不定，我继续试了模板匹配，还行，如果是一个取出来的部分图片去匹配原图那还是可以识别成功，但是有些图片是跳一跳那个跳的棋子或者上一个踏板遮挡了下一个踏板，那识别会有一点小问题，而且模板也要添加许多，每个模板匹配一下，然后取匹配程度最大的来计算距离（当匹配度大于某一个值直接取值），模板添加越多，跳的越准确，用的时间也越长（30多个模板最长用时大概4、5秒）。
@@ -160,12 +157,12 @@ int blue =Color.blue(clr);
 ##### 注意问题
 问题解决了，用rgb颜色对比来进行识别，注意颜色有时候有点细微的差别（尤其是背景色有差别），所以我们判断颜色是否相同的时候可以设置一个范围，当两个像素颜色的R、G、B三个颜色分别相减的**绝对值**再求和小于15大概可以认为是同一个颜色。
 
-反正还有其他一些问题需要自己去解决，才能够跳更多的分，我先在这个已经可以超过2000分了，其实都不难，关键看自己解决方法。
+反正还有其他一些问题需要自己去解决，才能够跳更多的分，我先在这个已经可以超过100k分了，其实都不难，关键看自己解决方法。
+
+![tyhj_100k.gif](http://upload-images.jianshu.io/upload_images/4906791-218698ce03fa27c8.gif?imageMogr2/auto-orient/strip)
 
 
-![G_0211045758.gif](http://upload-images.jianshu.io/upload_images/4906791-a3eec6f43e72a03d.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/240)
-
-
+项目地址（三个版本）：https://github.com/tyhjh/justJump.git
 
 
 
