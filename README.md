@@ -66,7 +66,7 @@ outputStream.close();
 ```
 
 
-优点就是想跳哪里跳哪里，想跳多少分跳多少分，还可以故意跳偏躲过反外挂机制；缺点就是需要自己动手，花时间，而且执行adb命令会有2秒的延迟，其实外部adb命令也是有延迟的，避免不了
+优点就是想跳哪里跳哪里，想跳多少分跳多少分，还可以故意跳偏躲过反外挂机制；缺点就是需要自己动手，花时间，而且执行adb命令会有一点点的延迟，其实外部adb命令也是有延迟的，避免不了
 
 ![image](http://upload-images.jianshu.io/upload_images/4906791-c41e25bd71fe9d2a.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/140)
 
