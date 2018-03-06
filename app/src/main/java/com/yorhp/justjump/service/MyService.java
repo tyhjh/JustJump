@@ -182,9 +182,9 @@ public class MyService extends Service {
             time = (int) (distence * 1.360);
         }*/
 
-        double k = (distence * (-0.00019) + 1.49);
-        if (k > 1.417) {
-            k = 1.417;
+        double k = (distence * (-0.00020) + 1.49);
+        if (k > 1.4175) {
+            k = 1.4175;
         }
         time = (int) (k * distence);
 
@@ -273,7 +273,7 @@ public class MyService extends Service {
                 }
                 //start=true;
                 thread.start();
-                new Thread(new Runnable() {
+                Thread restart=new Thread(new Runnable() {
                     @Override
                     public void run() {
                         while (true) {
@@ -292,7 +292,8 @@ public class MyService extends Service {
                             }
                         }
                     }
-                }).start();
+                });
+                restart.start();
                 btnView3.setVisibility(View.INVISIBLE);
             }
         });
