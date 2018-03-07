@@ -159,7 +159,7 @@ int blue =Color.blue(clr);
 
 反正还有其他一些问题需要自己去解决，才能够跳更多的分，我先在这个已经可以超过100k分了，其实都不难，关键看自己解决方法。
 
-![tyhj_100k.gif](http://upload-images.jianshu.io/upload_images/4906791-218698ce03fa27c8.gif?imageMogr2/auto-orient/strip)
+![tyhj_100k.gif](http://ac-fgtnb2h8.clouddn.com/5f7d065e2336cd49aa7c.gif)
 
 
 项目地址（三个版本）：https://github.com/tyhjh/justJump.git
