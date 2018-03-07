@@ -1,7 +1,6 @@
 package com.yorhp.justjump.opencv;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import static com.yorhp.justjump.service.MyService.bitmapToPath;
 import static com.yorhp.justjump.service.MyService.execShellCmd;
 import static com.yorhp.justjump.service.MyService.mePath;
-import static com.yorhp.justjump.service.MyService.screenPath;
 
 public class ImageRecognition {
 
@@ -34,44 +32,38 @@ public class ImageRecognition {
     public static double shotHeight = 0.23;
     public static double shotStart = 0.3;
 
-    public static double shotHeightMe = 0.29;
-    public static double shotStartMe = 0.4;
+    public static double shotHeightMe = 0.29;//截图比例
+    public static double shotStartMe = 0.4;//开始截图的位置
 
+    public static int heightMe = 0;
+    public static int height = 0;
 
-    public int getDistence() {
+    public int getDistence(Bitmap bitmap) {
 
-        Bitmap bitmap = BitmapFactory.decodeFile(screenPath);
-        int heightMe = (int) (bitmap.getHeight() * shotStartMe);
-        int height = (int) (bitmap.getHeight() * shotStart);
+        if (heightMe == 0 || height == 0) {
+            heightMe = (int) (bitmap.getHeight() * shotStartMe);
+            height = (int) (bitmap.getHeight() * shotStart);
+        }
 
 
         Bitmap bitmap_me = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * shotStartMe), bitmap.getWidth(), (int) (bitmap.getHeight() * shotHeightMe));
         File file_me = bitmapToPath(bitmap_me, "img_me");
-        String originmePath = file_me.getPath();
-
-
-        LikeResult result1 = matchImageMe(originmePath, mePath);
+        LikeResult result1 = matchImageMe(file_me.getPath(), mePath);
 
         android.graphics.Point point1 = result1.getPoint();
 
-
-        Bitmap workingBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        /*Bitmap workingBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(workingBitmap);
-
         //图像上画矩形
         Paint paint = new Paint();
         paint.setColor(bitmap.getPixel(500, height + 20));
         paint.setStyle(Paint.Style.FILL);
         canvas.drawRect(meX1, meY1 + heightMe - 10, meX2, meY2 + heightMe, paint);
-        bitmapToPath(workingBitmap, "img_clear");
+        bitmapToPath(workingBitmap, "img_clear");*/
 
+        android.graphics.Point point2 = getPoint(bitmap);
 
-        long time=System.currentTimeMillis();
-        android.graphics.Point point2 = getPoint();
-        //System.out.println("识别所用时间为"+(System.currentTimeMillis()-time));
-
-
-
+        bitmap.recycle();
         int distence = (int) (Math.sqrt((point1.x - point2.x) * (point1.x - point2.x) + (point1.y + heightMe - point2.y - height) * (point1.y + heightMe - point2.y - height)));
 
         return distence;
@@ -80,7 +72,7 @@ public class ImageRecognition {
 
     public static LikeResult matchImageMe(String originalFilePath, String templateFilePath1) {
 
-        long time=System.currentTimeMillis();
+        long time = System.currentTimeMillis();
 
         Mat template = Highgui.imread(templateFilePath1, Highgui.CV_LOAD_IMAGE_COLOR);
         Mat source = Highgui.imread(originalFilePath, Highgui.CV_LOAD_IMAGE_COLOR);
@@ -131,12 +123,29 @@ public class ImageRecognition {
     }
 
 
-    public static android.graphics.Point getPoint() {
-
-        Bitmap bitmapx = BitmapFactory.decodeFile(img_clear);
+    public static android.graphics.Point getPoint(Bitmap bitmapx) {
         Bitmap workingBitmap = bitmapx.createBitmap(bitmapx, 0, (int) (bitmapx.getHeight() * shotStart), bitmapx.getWidth(), (int) (bitmapx.getHeight() * shotHeight));
+        Canvas canvas2 = new Canvas(workingBitmap);
+        Paint paint2 = new Paint();
+        paint2.setColor(workingBitmap.getPixel(0, 0));
+        paint2.setStyle(Paint.Style.FILL);
+
+        int top = meY1 + heightMe - 10 - height;
+        if (top < 0) {
+            top = 0;
+        }
+
+        int bottom = meY2 + heightMe - height;
+        if (bottom > workingBitmap.getHeight()) {
+            bottom = workingBitmap.getHeight();
+        }
+
+
+        canvas2.drawRect(meX1, top, meX2, bottom, paint2);
+
         String next_find = "check/next_" + System.currentTimeMillis();
         bitmapToPath(workingBitmap, next_find);
+
         String next_find_path = MyApplication.rootDir + next_find + ".png";
         String img_find = "check/x_find" + System.currentTimeMillis();
 
@@ -212,6 +221,7 @@ public class ImageRecognition {
         boolean rightFind = false;
 
 
+        long time = System.currentTimeMillis();
         for (int y = 0; y < height; y++) {
             boolean out = false;
             boolean in = false;
@@ -235,6 +245,7 @@ public class ImageRecognition {
                     topPoint.x = x;
                     topPoint.y = 0;
                     in = true;
+                    System.out.println("第一次进入所用时间为" + (System.currentTimeMillis() - time));
                     System.out.println("第一次进入" + x + "，" + y);
                     if (eque(bitmap.getPixel(x, y + 1), backgrundColor, 10)) {
                         //System.out.println("第一次进入马上出去了" + x);
@@ -254,8 +265,8 @@ public class ImageRecognition {
                         if (leftPoint.x == 0 || leftPoint.x > x) {//----------进入的坐标在减小
                             leftPoint.x = x;
                             leftPoint.y = y;
-                            if(leftPoint.x<2){
-                                pureColor=false;
+                            if (leftPoint.x < 2) {
+                                pureColor = false;
                             }
                         } else if (!equeTabColor(bitmap.getPixel(x, y + 2), tabColor) && !leftFind) {//-------------------------------------找到了 leftPoint
                             leftPoint.x = x;
@@ -341,7 +352,6 @@ public class ImageRecognition {
                     }
                 }
             }
-            y = y + 1;
         }
 
         if (pureColor) {
@@ -388,86 +398,85 @@ public class ImageRecognition {
         int leftX = 0, rightX = 0;
 
 
-
-        if (!eque(tabColor,245,245,245)) {//有白点
-            if (eque(bitmap.getPixel(x, y),245,245,245)) {//坐标计算小错
+        if (!eque(tabColor, 245, 245, 245)) {//有白点
+            if (eque(bitmap.getPixel(x, y), 245, 245, 245)) {//坐标计算小错
                 for (int i = centerY; i > centerY - 24; i--) {//找到topY
-                    if ( !eque(bitmap.getPixel(x, i),245,245,245)) {
+                    if (!eque(bitmap.getPixel(x, i), 245, 245, 245)) {
                         topY = i;
                         break;
                     }
                 }
 
                 for (int i = centerY; i < centerY + 24; i++) {//找到bottomY
-                    if (!eque(bitmap.getPixel(x, i) ,245,245,245)) {
+                    if (!eque(bitmap.getPixel(x, i), 245, 245, 245)) {
                         bottomY = i;
                         break;
                     }
                 }
 
                 if (bottomY != 0 && topY != 0 && bottomY - topY < 26
-                        &&  eque(bitmap.getPixel(x, (bottomY + topY) / 2),245,245,245)) {//找到y
+                        && eque(bitmap.getPixel(x, (bottomY + topY) / 2), 245, 245, 245)) {//找到y
                     y = (bottomY + topY) / 2;
                 }
 
 
-                    for (int i = centerX; i > centerX - 41; i--) {//找到leftX
-                        if (!eque(bitmap.getPixel(i, y),245,245,245)){
-                            leftX=i;
-                            break;
-                        }
+                for (int i = centerX; i > centerX - 41; i--) {//找到leftX
+                    if (!eque(bitmap.getPixel(i, y), 245, 245, 245)) {
+                        leftX = i;
+                        break;
                     }
+                }
 
 
                 for (int i = centerX; i < centerX + 41; i++) {//找到rightX
-                    if (!eque(bitmap.getPixel(i, y),245,245,245)){
-                        rightX=i;
+                    if (!eque(bitmap.getPixel(i, y), 245, 245, 245)) {
+                        rightX = i;
                         break;
                     }
                 }
 
                 if (rightX != 0 && leftX != 0 && rightX - leftX < 41
-                        &&  eque(bitmap.getPixel((rightX + leftX) / 2,y),245,245,245)) {//找到x
+                        && eque(bitmap.getPixel((rightX + leftX) / 2, y), 245, 245, 245)) {//找到x
                     x = (leftX + rightX) / 2;
                 }
 
             } else {//坐标计算错误
 
-                for(int i=centerY;i>topPointY;i--){
-                    if(bottomY==0&&eque(bitmap.getPixel(centerX, i),245,245,245)){
-                        bottomY=i;
+                for (int i = centerY; i > topPointY; i--) {
+                    if (bottomY == 0 && eque(bitmap.getPixel(centerX, i), 245, 245, 245)) {
+                        bottomY = i;
                         i--;
                     }
 
-                    if(bottomY!=0&&!eque(bitmap.getPixel(centerX, i),245,245,245)){
-                        topY=i;
+                    if (bottomY != 0 && !eque(bitmap.getPixel(centerX, i), 245, 245, 245)) {
+                        topY = i;
                         break;
                     }
                 }
 
-                if(bottomY-topY<26&&eque(bitmap.getPixel(centerX, (bottomY + topY) / 2),245,245,245)){
-                    y=(bottomY + topY) / 2;
+                if (bottomY - topY < 26 && eque(bitmap.getPixel(centerX, (bottomY + topY) / 2), 245, 245, 245)) {
+                    y = (bottomY + topY) / 2;
                     System.out.println("Y出错了，并且纠正了");
                 }
 
 
                 for (int i = centerX; i > centerX - 41; i--) {//找到leftX
-                    if (!eque(bitmap.getPixel(i, y),245,245,245)){
-                        leftX=i;
+                    if (!eque(bitmap.getPixel(i, y), 245, 245, 245)) {
+                        leftX = i;
                         break;
                     }
                 }
 
 
                 for (int i = centerX; i < centerX + 41; i++) {//找到rightX
-                    if (!eque(bitmap.getPixel(i, y),245,245,245)){
-                        rightX=i;
+                    if (!eque(bitmap.getPixel(i, y), 245, 245, 245)) {
+                        rightX = i;
                         break;
                     }
                 }
 
                 if (rightX != 0 && leftX != 0 && rightX - leftX < 41
-                        &&  eque(bitmap.getPixel((rightX + leftX) / 2,y),245,245,245)) {//找到x
+                        && eque(bitmap.getPixel((rightX + leftX) / 2, y), 245, 245, 245)) {//找到x
                     x = (leftX + rightX) / 2;
                 }
 

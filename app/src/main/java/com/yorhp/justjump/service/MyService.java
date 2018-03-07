@@ -72,29 +72,20 @@ public class MyService extends Service {
             @Override
             public void run() {
                 while (start) {
-                    File file1 = new File(screenPath);
-                    if (file1.exists())
-                        file1.delete();
-
                     System.out.println("跳一下所用时间为"+(System.currentTimeMillis()-spendTime));
                     spendTime=System.currentTimeMillis();
                     execShellCmd("screencap -p " + screenPath);
                     Bitmap bitmap = BitmapFactory.decodeFile(screenPath);
                     while (bitmap == null) {
                         try {
-                            Thread.sleep(100);
+                            Thread.sleep(60);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                         bitmap = BitmapFactory.decodeFile(screenPath);
                     }
-
-                    distence = imageRecognition.getDistence();
-
-
+                    distence = imageRecognition.getDistence(bitmap);
                     System.out.println("距离为：" + distence);
-
-
                     File file = new File(screenPath);
                     if (file.exists()) {
                         file.delete();
@@ -116,7 +107,7 @@ public class MyService extends Service {
 
     private int getTime() {
         int time = 0;
-        double k = (distence * (-0.00020) + 1.49);
+        double k = (distence * (-0.00020) + 1.485);
         if (k > 1.417) {
             k = 1.417;
         }
