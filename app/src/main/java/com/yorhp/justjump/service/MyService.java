@@ -28,7 +28,9 @@ import java.io.IOException;
 
 public class MyService extends Service {
 
+    public static boolean DEBUG=false;
 
+    long spendTime=0;
     static Process process = null;
     static DataOutputStream os = null;
 
@@ -60,6 +62,8 @@ public class MyService extends Service {
     public void onCreate() {
         super.onCreate();
         showNotification(getApplicationContext(),0,"JustJump","程序正在运行中");
+        createWindowView();
+
         File file1 = new File(screenPath);
         if (file1.exists())
             file1.delete();
@@ -67,16 +71,18 @@ public class MyService extends Service {
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                int i = 0;
-                while (i >= 0 && start) {
+                while (start) {
                     File file1 = new File(screenPath);
                     if (file1.exists())
                         file1.delete();
+
+                    System.out.println("跳一下所用时间为"+(System.currentTimeMillis()-spendTime));
+                    spendTime=System.currentTimeMillis();
                     execShellCmd("screencap -p " + screenPath);
                     Bitmap bitmap = BitmapFactory.decodeFile(screenPath);
                     while (bitmap == null) {
                         try {
-                            Thread.sleep(300);
+                            Thread.sleep(100);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -97,102 +103,25 @@ public class MyService extends Service {
                     String msg = "input touchscreen swipe 560 1600 560 1600 " + time;
                     execShellCmd(msg);
                     try {
-                        Thread.sleep(2800);
+                        Thread.sleep(time+1800);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    i++;
+                    if(DEBUG)
+                        start=false;
                 }
             }
         });
-        createWindowView();
-        Thread auto = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    if (!start)
-                        execShellCmd("screencap -p " + screenPath);
-                    Bitmap bitmap = BitmapFactory.decodeFile(screenPath);
-                    while (bitmap == null) {
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        bitmap = BitmapFactory.decodeFile(screenPath);
-                    }
-
-                    ImageRecognition.LikeResult likeResult = ImageRecognition.matchImageMe(screenPath, mePath);
-
-                    if (likeResult.getLikeLevel() > 0.6) {
-                        try {
-                            if (!start) {
-                                start = true;
-                                thread.start();
-                            }
-                            Thread.sleep(2000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        if (start) {
-                            start = false;
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-
-                }
-            }
-        });
-        //auto.start();
-
     }
 
     private int getTime() {
         int time = 0;
-        /*if (distence < 200) {
-            time = (int) (distence * 1.430);
-        } else if (distence < 250) {
-            time = (int) (distence * 1.425);
-        } else if (distence < 300) {
-            time = (int) (distence * 1.420);
-        } else if (distence < 350) {
-            time = (int) (distence * 1.415);
-        } else if (distence < 400) {
-            time = (int) (distence * 1.405);
-        } else if (distence < 450) {
-            time = (int) (distence * 1.40);
-        } else if (distence < 500) {
-            time = (int) (distence * 1.395);
-        } else if (distence < 550) {
-            time = (int) (distence * 1.390);
-        } else if (distence < 600) {
-            time = (int) (distence * 1.385);
-        } else if (distence < 650) {
-            time = (int) (distence * 1.380);
-        } else if (distence < 700) {
-            time = (int) (distence * 1.372);
-        } else if (distence < 750) {
-            time = (int) (distence * 1.367);
-        } else if (distence > 700) {
-            time = (int) (distence * 1.360);
-        }*/
-
         double k = (distence * (-0.00020) + 1.49);
-        if (k > 1.4175) {
-            k = 1.4175;
+        if (k > 1.417) {
+            k = 1.417;
         }
         time = (int) (k * distence);
-
-
         System.out.println("系数为：" + k);
-
-        //time = (int) (1.4 * distence);
-
         return time;
     }
 
@@ -262,39 +191,18 @@ public class MyService extends Service {
         });
 
 
-        final int[] time = {0};
         btnView3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!start) {
-                    start = true;
-                } else {
-                    start = false;
+
+                if(DEBUG){
+                    start=true;
+                    thread.start();
+                }else {
+                    start=true;
+                    thread.start();
+                    btnView3.setVisibility(View.INVISIBLE);
                 }
-                //start=true;
-                thread.start();
-                Thread restart=new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                Thread.sleep(60000);
-                                time[0]++;
-                                if (time[0] > 50) {
-                                    start = false;
-                                    Thread.sleep(5000);
-                                    time[0]=0;
-                                    start = true;
-                                    thread.start();
-                                }
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                });
-                restart.start();
-                btnView3.setVisibility(View.INVISIBLE);
             }
         });
         windowManager.addView(btnView3, params3);

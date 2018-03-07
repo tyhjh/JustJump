@@ -66,9 +66,11 @@ public class ImageRecognition {
         bitmapToPath(workingBitmap, "img_clear");
 
 
+        long time=System.currentTimeMillis();
         android.graphics.Point point2 = getPoint();
+        //System.out.println("识别所用时间为"+(System.currentTimeMillis()-time));
 
-        System.out.println("width=" + point2.x + "，height=" + point2.y);
+
 
         int distence = (int) (Math.sqrt((point1.x - point2.x) * (point1.x - point2.x) + (point1.y + heightMe - point2.y - height) * (point1.y + heightMe - point2.y - height)));
 
@@ -77,6 +79,8 @@ public class ImageRecognition {
 
 
     public static LikeResult matchImageMe(String originalFilePath, String templateFilePath1) {
+
+        long time=System.currentTimeMillis();
 
         Mat template = Highgui.imread(templateFilePath1, Highgui.CV_LOAD_IMAGE_COLOR);
         Mat source = Highgui.imread(originalFilePath, Highgui.CV_LOAD_IMAGE_COLOR);
@@ -120,6 +124,8 @@ public class ImageRecognition {
         LikeResult likeResult = new LikeResult();
         likeResult.setPoint(point);
         likeResult.setLikeLevel(mlr.maxVal);
+
+        //System.out.println("识别所用时间为"+(System.currentTimeMillis()-time));
 
         return likeResult;
     }
