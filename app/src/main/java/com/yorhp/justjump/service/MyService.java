@@ -96,7 +96,7 @@ public class MyService extends Service {
                     String msg = "input touchscreen swipe 560 1600 560 1600 " + time;
                     execShellCmd(msg);
                     try {
-                        Thread.sleep(time + 1770);
+                        Thread.sleep(time + 1790);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
