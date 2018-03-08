@@ -32,18 +32,26 @@ public class ImageRecognition {
     public static double shotHeight = 0.23;
     public static double shotStart = 0.3;
 
+    public static double k=0.57735;
+
+    public static int tabHeight=0;
+
     public static double shotHeightMe = 0.29;//截图比例
     public static double shotStartMe = 0.4;//开始截图的位置
 
     public static int heightMe = 0;
-    public static int height = 0;
+    public static int height = 0;//距离顶部的距离
 
     public int getDistence(Bitmap bitmap) {
 
         if (heightMe == 0 || height == 0) {
             heightMe = (int) (bitmap.getHeight() * shotStartMe);
             height = (int) (bitmap.getHeight() * shotStart);
+            tabHeight= (int) (bitmap.getHeight()*shotHeight);
         }
+
+
+
 
 
         Bitmap bitmap_me = bitmap.createBitmap(bitmap, 0, (int) (bitmap.getHeight() * shotStartMe), bitmap.getWidth(), (int) (bitmap.getHeight() * shotHeightMe));
@@ -61,7 +69,7 @@ public class ImageRecognition {
         canvas.drawRect(meX1, meY1 + heightMe - 10, meX2, meY2 + heightMe, paint);
         bitmapToPath(workingBitmap, "img_clear");*/
 
-        android.graphics.Point point2 = getPoint(bitmap);
+        android.graphics.Point point2 = getPoint(bitmap,new android.graphics.Point(point1.x,point1.y+heightMe));
 
         if(point2.x==0&&point2.y==0){
             return 0;
@@ -115,7 +123,7 @@ public class ImageRecognition {
         android.graphics.Point point = new android.graphics.Point();
         point.set(x, y);
 
-        Highgui.imwrite(MyApplication.rootDir + "matching/" + "/原图中的匹配图" + ".jpg", source);
+        //Highgui.imwrite(MyApplication.rootDir + "matching/" + "/原图中的匹配图" + ".jpg", source);
 
         LikeResult likeResult = new LikeResult();
         likeResult.setPoint(point);
@@ -127,7 +135,7 @@ public class ImageRecognition {
     }
 
 
-    public static android.graphics.Point getPoint(Bitmap bitmapx) {
+    public static android.graphics.Point getPoint(Bitmap bitmapx, android.graphics.Point me) {
         Bitmap workingBitmap = bitmapx.createBitmap(bitmapx, 0, (int) (bitmapx.getHeight() * shotStart), bitmapx.getWidth(), (int) (bitmapx.getHeight() * shotHeight));
         Canvas canvas2 = new Canvas(workingBitmap);
         Paint paint2 = new Paint();
@@ -146,6 +154,9 @@ public class ImageRecognition {
 
 
         canvas2.drawRect(meX1, top, meX2, bottom, paint2);
+
+
+
 
         String next_find = "check/next_" + System.currentTimeMillis();
         bitmapToPath(workingBitmap, next_find);
@@ -225,8 +236,50 @@ public class ImageRecognition {
         boolean rightFind = false;
 
 
-        long time = System.currentTimeMillis();
-        for (int y = 0; y < height; y++) {
+        backgrundColor=bitmap.getPixel(0,0);
+
+        android.graphics.Point middlePoint=new android.graphics.Point(0,0);
+
+        System.out.println("me.x：" + me.x);
+        System.out.println("me.y：" + me.y);
+
+
+
+        if((me.x)<width/2){
+            int stratX= (int) ((me.y-tabHeight-ImageRecognition.height)/k)+me.x+5;
+
+            System.out.println("stratX：" + stratX);
+            for(int x=width-1;x>stratX;x--){
+                int y=  me.y-(int)((x-me.x)*k)-ImageRecognition.height;
+                if(!eque(backgrundColor,bitmap.getPixel(x,y),10)){
+                    middlePoint=new android.graphics.Point(x,y);
+                    break;
+                }
+            }
+        }else {
+            int stratX= me.x-(int) ((me.y-tabHeight-ImageRecognition.height)/k)-5;
+            for(int x=0;x<stratX;x++){
+                int y=  me.y-(int)((me.x-x)*k)-ImageRecognition.height;
+                if(!eque(backgrundColor,bitmap.getPixel(x,y),10)){
+                    middlePoint=new android.graphics.Point(x,y);
+                    break;
+                }
+            }
+        }
+
+        canvas.drawPoint(middlePoint.x, middlePoint.y, paint);
+        System.out.println("找到最外面的点为：" + middlePoint.x+ "，" + middlePoint.y);
+
+
+        int topY=0;
+        if(middlePoint.y>150){
+            topY=middlePoint.y-150;
+        }
+
+
+
+
+        for (int y = topY; y < height; y++) {
             boolean out = false;
             boolean in = false;
 
@@ -250,12 +303,23 @@ public class ImageRecognition {
                     topPoint.y = 0;
                     in = true;
                     //System.out.println("第一次进入所用时间为" + (System.currentTimeMillis() - time));
-                    //System.out.println("第一次进入" + x + "，" + y);
+                    System.out.println("第一次进入" + x + "，" + y);
                     if (eque(bitmap.getPixel(x, y + 1), backgrundColor, 10)) {
                         //System.out.println("第一次进入马上出去了" + x);
                         out = true;
                     }
-                    pureColor = isPure(bitmap, clr, x, y);
+
+                    if(me.x<width/2){
+                        int pointY=me.y-(int)((x-me.x)*k)-ImageRecognition.height;
+                        canvas.drawPoint(x,pointY ,paint);
+                        bitmapToPath(bitmap, img_find);
+                        return new android.graphics.Point(x,pointY);
+                    }else {
+                        int pointY=me.y-(int)((me.x-x)*k)-ImageRecognition.height;
+                        canvas.drawPoint(x, pointY,paint);
+                        bitmapToPath(bitmap, img_find);
+                        return new android.graphics.Point(x,pointY);
+                    }
 
 
 
