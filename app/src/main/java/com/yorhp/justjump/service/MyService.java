@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,9 +29,9 @@ import java.io.IOException;
 
 public class MyService extends Service {
 
-    public static boolean DEBUG=false;
+    public static boolean DEBUG = false;
 
-    long spendTime=0;
+    long spendTime = 0;
     static Process process = null;
     static DataOutputStream os = null;
 
@@ -61,7 +62,7 @@ public class MyService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        showNotification(getApplicationContext(),0,"JustJump","程序正在运行中");
+        showNotification(getApplicationContext(), 0, "JustJump", "程序正在运行中");
         createWindowView();
 
         File file1 = new File(screenPath);
@@ -72,8 +73,8 @@ public class MyService extends Service {
             @Override
             public void run() {
                 while (start) {
-                    System.out.println("跳一下所用时间为"+(System.currentTimeMillis()-spendTime));
-                    spendTime=System.currentTimeMillis();
+                    Log.e("跳一下所用时间为",(System.currentTimeMillis() - spendTime)+"\n");
+                    spendTime = System.currentTimeMillis();
                     execShellCmd("screencap -p " + screenPath);
                     Bitmap bitmap = BitmapFactory.decodeFile(screenPath);
                     while (bitmap == null) {
@@ -86,20 +87,21 @@ public class MyService extends Service {
                     }
                     distence = imageRecognition.getDistence(bitmap);
                     System.out.println("距离为：" + distence);
-                    File file = new File(screenPath);
-                    if (file.exists()) {
-                        file.delete();
+
+                    if (distence == 0) {
+                        continue;
                     }
+
                     int time = getTime();
                     String msg = "input touchscreen swipe 560 1600 560 1600 " + time;
                     execShellCmd(msg);
                     try {
-                        Thread.sleep(time+1800);
+                        Thread.sleep(time + 1770);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if(DEBUG)
-                        start=false;
+                    if (DEBUG)
+                        start = false;
                 }
             }
         });
@@ -108,8 +110,8 @@ public class MyService extends Service {
     private int getTime() {
         int time = 0;
         double k = (distence * (-0.00020) + 1.485);
-        if (k > 1.417) {
-            k = 1.417;
+        if (k > 1.416) {
+            k = 1.416;
         }
         time = (int) (k * distence);
         System.out.println("系数为：" + k);
@@ -186,11 +188,11 @@ public class MyService extends Service {
             @Override
             public void onClick(View view) {
 
-                if(DEBUG){
-                    start=true;
+                if (DEBUG) {
+                    start = true;
                     thread.start();
-                }else {
-                    start=true;
+                } else {
+                    start = true;
                     thread.start();
                     btnView3.setVisibility(View.INVISIBLE);
                 }
@@ -252,7 +254,6 @@ public class MyService extends Service {
     }
 
 
-
     private void showNotification(Context context, int id, String title, String text) {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
@@ -263,14 +264,13 @@ public class MyService extends Service {
         builder.setPriority(Notification.PRIORITY_MAX);
         builder.setVisibility(Notification.VISIBILITY_SECRET);
         Notification notification = builder.build();
-        notification.flags=Notification.FLAG_NO_CLEAR;
+        notification.flags = Notification.FLAG_NO_CLEAR;
 
         NotificationManager notificationManager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(id, notification);
         startForeground(id, notification);
     }
-
 
 
 }

@@ -63,6 +63,10 @@ public class ImageRecognition {
 
         android.graphics.Point point2 = getPoint(bitmap);
 
+        if(point2.x==0&&point2.y==0){
+            return 0;
+        }
+
         bitmap.recycle();
         int distence = (int) (Math.sqrt((point1.x - point2.x) * (point1.x - point2.x) + (point1.y + heightMe - point2.y - height) * (point1.y + heightMe - point2.y - height)));
 
@@ -86,7 +90,7 @@ public class ImageRecognition {
         //获得最可能点，MinMaxLocResult是其数据格式，包括了最大、最小点的位置x、y
         Core.MinMaxLocResult mlr = Core.minMaxLoc(result);
 
-        System.out.println("相似度：" + mlr.maxVal);
+        //System.out.println("相似度：" + mlr.maxVal);
 
         Point matchLoc = mlr.maxLoc;
         //在原图上的对应模板可能位置画一个绿色矩形
@@ -245,18 +249,14 @@ public class ImageRecognition {
                     topPoint.x = x;
                     topPoint.y = 0;
                     in = true;
-                    System.out.println("第一次进入所用时间为" + (System.currentTimeMillis() - time));
-                    System.out.println("第一次进入" + x + "，" + y);
+                    //System.out.println("第一次进入所用时间为" + (System.currentTimeMillis() - time));
+                    //System.out.println("第一次进入" + x + "，" + y);
                     if (eque(bitmap.getPixel(x, y + 1), backgrundColor, 10)) {
                         //System.out.println("第一次进入马上出去了" + x);
                         out = true;
                     }
                     pureColor = isPure(bitmap, clr, x, y);
 
-                    if (pureColor)
-                        System.out.println("是纯色");
-                    else
-                        System.out.println("不是纯色");
 
 
                 } else if (!in && topPoint != null && equeTabColor(clr, tabColor)) {//-------------------进入tab
@@ -272,7 +272,7 @@ public class ImageRecognition {
                             leftPoint.x = x;
                             leftPoint.y = y;
                             leftFind = true;
-                            System.out.println("纯色，leftPoint：" + x + "，" + y);
+                            //System.out.println("纯色，leftPoint：" + x + "，" + y);
                         }
                     } else if (!pureColor) {//-------------------------------------------------------------------非纯色，不用 leftPoint
                         //System.out.println("非纯色，不用 leftPoint");
@@ -296,7 +296,7 @@ public class ImageRecognition {
                             rightPoint.y = y;
                             rightPoint.x = x;
                             rightFind = true;
-                            System.out.println("找到了 rightPoint：" + rightPoint.x + "，" + rightPoint.y);
+                            //System.out.println("找到了 rightPoint：" + rightPoint.x + "，" + rightPoint.y);
                         }
                     } else if (x == width - 1) {//-------------------------------------------------碰壁了
                         rightFind = true;
@@ -328,8 +328,13 @@ public class ImageRecognition {
                         centerY = center.y;
                         paint.setColor(Color.MAGENTA);
                         canvas.drawPoint(centerX, centerY, paint);
-
                         bitmapToPath(bitmap, img_find);
+
+
+                        if(Math.sqrt((topPoint.x-center.x)*(topPoint.x-center.x)+(topPoint.y-center.y)*(topPoint.y-center.y))<8){
+                            return new android.graphics.Point(0, 0);
+                        }
+
                         return new android.graphics.Point(centerX, centerY);
                     }
                 } else {
@@ -348,6 +353,12 @@ public class ImageRecognition {
                         canvas.drawPoint(centerX, centerY, paint);
 
                         bitmapToPath(bitmap, img_find);
+
+
+                        if(Math.sqrt((topPoint.x-center.x)*(topPoint.x-center.x)+(topPoint.y-center.y)*(topPoint.y-center.y))<8){
+                            return new android.graphics.Point(0, 0);
+                        }
+
                         return new android.graphics.Point(centerX, centerY);
                     }
                 }
@@ -370,6 +381,11 @@ public class ImageRecognition {
             canvas.drawPoint(centerX, centerY, paint);
 
             bitmapToPath(bitmap, img_find);
+
+            if(Math.sqrt((topPoint.x-center.x)*(topPoint.x-center.x)+(topPoint.y-center.y)*(topPoint.y-center.y))<8){
+                return new android.graphics.Point(0, 0);
+            }
+
             return new android.graphics.Point(centerX, centerY);
         } else {
             canvas.drawPoint(topPoint.x, topPoint.y, paint);
@@ -386,6 +402,11 @@ public class ImageRecognition {
             canvas.drawPoint(centerX, centerY, paint);
 
             bitmapToPath(bitmap, img_find);
+
+            if(Math.sqrt((topPoint.x-center.x)*(topPoint.x-center.x)+(topPoint.y-center.y)*(topPoint.y-center.y))<8){
+                return new android.graphics.Point(0, 0);
+            }
+
             return new android.graphics.Point(centerX, centerY);
         }
     }
