@@ -239,9 +239,7 @@ public class ImageRecognition {
         backgrundColor=bitmap.getPixel(0,0);
 
         android.graphics.Point middlePoint=new android.graphics.Point(0,0);
-
-        System.out.println("me.x：" + me.x);
-        System.out.println("me.y：" + me.y);
+        
 
 
 
