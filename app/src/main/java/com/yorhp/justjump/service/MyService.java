@@ -109,7 +109,7 @@ public class MyService extends Service {
 
     private int getTime() {
         int time = 0;
-        double k = (distence * (-0.00020) + 1.485);
+        double k = (distence * (-0.00020) + 1.487);
         if (k > 1.416) {
             k = 1.416;
         }
